@@ -13,13 +13,19 @@ const logSchema = new Schema({
     resource: {
         type: String
     },
-    //Usuario afectado por la acción qeu se le hizo
-    targetUser: {
+    // Entidad afectada por la acción (usuario, producto, rol, etc.)
+    entityId: {
         type: Schema.Types.ObjectId,
-        ref: 'userModel',
+        // refPath permite popular dinámicamente según el modelo indicado en entityModel
+        refPath: 'entityModel',
         default: null
     },
-    targetUserName: {
+    // Nombre del modelo de mongoose al que pertenece entityId ('userModel', 'Product', etc.)
+    entityModel: {
+        type: String,
+        default: null
+    },
+    entityName: {
         type: String,
         default: null
     },

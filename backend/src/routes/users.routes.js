@@ -1,11 +1,28 @@
 import { Router } from 'express'
 import { userController } from '../controllers/user.controller.js'
+import { userModel } from '../models/user.model.js'
 import { authMiddleware } from '../middleware/auth.middleware.js'
 import { checkPermission } from '../middleware/role.middleware.js'
 import { logAction } from '../middleware/logger.middleware.js'
+import { createEntityHistoryHandler } from '../controllers/logs.controller.js'
 
 const router = Router()
 const controller = new userController()
+
+// Config de auditoría compartida por las rutas de usuarios
+const userAudit = {
+    entityModel: userModel,
+    snapshot: {
+        fields: ['name', 'email', 'role', 'isActive', 'lastLogin'],
+        populate: 'role',
+        transform: (snapshot, doc) => ({
+            ...snapshot,
+            role: doc.role?.name || doc.role,
+            roleId: doc.role?._id
+        })
+    },
+    compareFields: ['name', 'email', 'role', 'isActive']
+}
 
 //  rutas con metadata
 const routes = [
@@ -23,7 +40,7 @@ const routes = [
         permission: 'users.create',
         description: 'Crear usuario',
         handler: controller.createUser,
-        middlewares: [logAction('create', 'users')]
+        middlewares: [logAction({ ...userAudit, action: 'create', resource: 'users', responseKey: 'newUser' })]
     },
     {
         method: 'GET',
@@ -31,7 +48,7 @@ const routes = [
         permission: 'users.read',
         description: 'Obtener un usuario',
         handler: controller.getUser,
-        middlewares: [logAction('read', 'users')]
+        middlewares: [logAction({ ...userAudit, action: 'read', resource: 'users' })]
     },
     {
         method: 'PUT',
@@ -39,7 +56,7 @@ const routes = [
         permission: 'users.update',
         description: 'Actualizar usuario',
         handler: controller.updateUser,
-        middlewares: [logAction('update', 'users')]
+        middlewares: [logAction({ ...userAudit, action: 'update', resource: 'users', responseKey: 'user' })]
     },
     {
         method: 'PATCH',
@@ -47,14 +64,14 @@ const routes = [
         permission: 'users.update',
         description: 'Activar/Desactivar usuario',
         handler: controller.toggleUserStatus,
-        middlewares: [logAction('update', 'users')]
+        middlewares: [logAction({ ...userAudit, action: 'update', resource: 'users', responseKey: 'user' })]
     },
     {
         method: 'GET',
         path: '/users/:userId/history',
         permission: 'logs.read',
         description: 'Ver historial de cambios del usuario',
-        handler: controller.getUserHistory,
+        handler: createEntityHistoryHandler(userModel.modelName, 'userId'),
         middlewares: []
     }
 ];

@@ -1,106 +1,73 @@
-import { Log } from "../models/logs.model.js";
-import { userModel } from "../models/user.model.js";
+import { fetchEntitySnapshot } from '../services/entitySnapshot.service.js';
+import { createLog } from '../services/log.service.js';
+import { diffFields } from '../utils/objectDiff.js';
 
-export const logAction = (action, resource) => {
+/**
+ * Middleware genérico de auditoría. No conoce el shape de ninguna entidad en
+ * particular: recibe el modelo de mongoose y la configuración de snapshot/comparación
+ * por parámetro, así puede reutilizarse para usuarios, productos, roles, etc.
+ *
+ * @param {Object} config
+ * @param {'create'|'update'|'delete'|'read'} config.action
+ * @param {string} config.resource - nombre del recurso para la bitácora (ej. 'users')
+ * @param {import('mongoose').Model} config.entityModel - modelo mongoose de la entidad afectada
+ * @param {Object} [config.snapshot] - { fields, populate, transform } usados para el "antes"
+ * @param {string} [config.responseKey] - clave del body de respuesta donde viene la entidad (ej. 'newUser')
+ * @param {string[]} [config.compareFields] - campos a comparar para calcular changedFields
+ */
+export const logAction = ({
+    action,
+    resource,
+    entityModel,
+    snapshot: { fields = [], populate = null, transform = null } = {},
+    responseKey = null,
+    compareFields = fields,
+}) => {
     return async (req, res, next) => {
-        // Capturar snapshot ANTES de la acción (para update/delete)
         let dataBefore = null;
-        let targetUser = null;
-        let targetUserName = null;
 
         if (req.params.id && (action === 'update' || action === 'delete')) {
-            try {
-                const user = await userModel.findById(req.params.id).populate('role');
-                if (user) {
-                    targetUser = user._id;
-                    targetUserName = user.name;
-
-                    // Guardar snapshot completo (sin password)
-                    dataBefore = {
-                        name: user.name,
-                        email: user.email,
-                        role: user.role?.name || user.role,
-                        roleId: user.role?._id,
-                        isActive: user.isActive,
-                        lastLogin: user.lastLogin
-                    };
-                }
-            } catch (error) {
-                console.error('Error fetching user before action:', error);
-            }
+            dataBefore = await fetchEntitySnapshot(entityModel, req.params.id, { fields, populate, transform });
         }
 
-        // Interceptar la respuesta
         const originalJson = res.json;
 
         res.json = async function (data) {
-            // Crear log después de la respuesta
             if (req.user) {
+                const entity = responseKey ? data?.[responseKey] : null;
+
+                const logData = {
+                    user: req.user.id,
+                    action,
+                    resource,
+                    details: `${req.method} ${req.originalUrl}`,
+                    userAgent: req.get('user-agent'),
+                    statusCode: res.statusCode,
+                    dataBefore,
+                };
+
+                if (entity) {
+                    logData.entityId = entity.id;
+                    logData.entityModel = entityModel.modelName;
+                    logData.entityName = entity.name;
+                    logData.dataAfter = action === 'delete'
+                        ? null
+                        : fields.reduce((snapshot, field) => {
+                            snapshot[field] = entity[field];
+                            return snapshot;
+                        }, {});
+
+                    if (action === 'update') {
+                        logData.changedFields = diffFields(dataBefore, logData.dataAfter, compareFields);
+                    }
+                } else if (dataBefore) {
+                    // No vino entidad en la respuesta (ej. delete sin payload): usamos el snapshot previo
+                    logData.entityId = req.params.id;
+                    logData.entityModel = entityModel.modelName;
+                }
+
                 try {
-                    const logData = {
-                        user: req.user.id,
-                        action,
-                        resource,
-                        details: `${req.method} ${req.originalUrl}`,
-                        userAgent: req.get('user-agent'),
-                        statusCode: res.statusCode,
-                        dataBefore: dataBefore
-                    };
-
-                    // Para CREATE: guardar el usuario creado en dataAfter
-                    if (action === 'create' && data.newUser) {
-                        logData.targetUser = data.newUser.id;
-                        logData.targetUserName = data.newUser.name;
-                        logData.dataAfter = {
-                            name: data.newUser.name,
-                            email: data.newUser.email,
-                            role: data.newUser.role,
-                            roleId: data.newUser.roleId
-                        };
-                    }
-                    // Para UPDATE: guardar el usuario actualizado en dataAfter
-                    else if (action === 'update' && data.user) {
-                        logData.targetUser = data.user.id;
-                        logData.targetUserName = data.user.name;
-
-                        // Construir dataAfter con el mismo formato que dataBefore
-                        logData.dataAfter = {
-                            name: data.user.name,
-                            email: data.user.email,
-                            role: data.user.role, // Ya viene como nombre del rol del controller
-                            roleId: data.user.roleId,
-                            isActive: data.user.isActive
-                        };
-
-                        // Calcular campos que cambiaron (ignorar roleId en la comparación)
-                        logData.changedFields = [];
-                        if (dataBefore && logData.dataAfter) {
-                            // Comparar solo campos relevantes (sin roleId)
-                            const fieldsToCompare = ['name', 'email', 'role', 'isActive'];
-
-                            fieldsToCompare.forEach(field => {
-                                const before = String(dataBefore[field] || '');
-                                const after = String(logData.dataAfter[field] || '');
-
-                                if (before !== after) {
-                                    logData.changedFields.push(field);
-                                }
-                            });
-                        }
-                    }
-                    // Para DELETE: solo guardar el before
-                    else if (action === 'delete' && data.deleteUser) {
-                        logData.targetUser = data.deleteUser.id;
-                        logData.targetUserName = data.deleteUser.name;
-                        logData.dataAfter = null; // Fue eliminado
-                    }
-                    // Para otros casos (read, etc)
-                    else if (targetUser) {
-                        logData.targetUser = targetUser;
-                        logData.targetUserName = targetUserName;
-                    }
-
-                    await Log.create(logData);
+                    await createLog(logData);
                 } catch (error) {
                     console.error('Error creating log:', error);
                 }

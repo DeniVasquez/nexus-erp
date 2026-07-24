@@ -44,7 +44,7 @@ export const generateExcelReport = async (req, res) => {
     let query = Log.find(filter)
       .select("-__v")
       .populate("user", "name email")
-      .populate("targetUser", "name email")
+      .populate("entityId", "-password -__v")
       .sort({ createdAt: -1 });
 
     // Aplicar límite según exportAll
@@ -124,7 +124,7 @@ export const generateExcelReport = async (req, res) => {
         log.user?.name || "Desconocido",
         log.action,
         log.resource,
-        log.targetUser?.name || log.targetUserName || "-",
+        log.entityId?.name || log.entityName || "-",
         log.statusCode,
       ]);
     });
@@ -230,7 +230,7 @@ export const generatePDFReport = async (req, res) => {
     let query = Log.find(filter)
       .select("-__v")
       .populate("user", "name email")
-      .populate("targetUser", "name email")
+      .populate("entityId", "-password -__v")
       .sort({ createdAt: -1 });
 
     // Aplicar límite según exportAll
@@ -325,7 +325,7 @@ export const generatePDFReport = async (req, res) => {
       doc.text(log.user?.name || "Desconocido", 130, y, { width: 90 });
       doc.text(log.action, 220, y, { width: 60 });
       doc.text(log.resource, 280, y, { width: 70 });
-      doc.text(log.targetUser?.name || log.targetUserName || "-", 350, y, {
+      doc.text(log.entityId?.name || log.entityName || "-", 350, y, {
         width: 100,
       });
       doc.text(log.statusCode?.toString() || "-", 450, y, { width: 50 });

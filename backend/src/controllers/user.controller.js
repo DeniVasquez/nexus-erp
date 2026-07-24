@@ -2,7 +2,7 @@ import { userModel } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../services/jwt.service.js";
 import mongoose from "mongoose";
-import { Log } from "../models/logs.model.js";
+import { createLog } from "../services/log.service.js";
 import { Role } from "../models/role.model.js";
 
 export class userController {
@@ -99,12 +99,13 @@ export class userController {
 
       // Log de login
       try {
-        await Log.create({
+        await createLog({
           user: user._id,
           action: "login",
           resource: "auth",
-          targetUser: user._id,
-          targetUserName: user.name,
+          entityId: user._id,
+          entityModel: userModel.modelName,
+          entityName: user.name,
           details: `Login exitoso`,
           ipAddress: req.ip,
           userAgent: req.get("user-agent"),
@@ -138,12 +139,13 @@ export class userController {
   async logout(req, res) {
     try {
       // Crear log de logout
-      await Log.create({
+      await createLog({
         user: req.user.id,
         action: "logout",
         resource: "auth",
-        targetUser: req.user.id,
-        targetUserName: req.user.name || "Usuario",
+        entityId: req.user.id,
+        entityModel: userModel.modelName,
+        entityName: req.user.name || "Usuario",
         details: `Logout exitoso`,
         ipAddress: req.ip,
         userAgent: req.get("user-agent"),
@@ -543,27 +545,6 @@ export class userController {
         msj: "Error al cambiar estado del usuario",
         error: error.message,
       });
-    }
-  }
-
-  // En user.controller.js
-  async getUserHistory(req, res) {
-    const { userId } = req.params;
-
-    try {
-      const logs = await Log.find({
-        targetUser: userId,
-        action: { $in: ["create", "update", "delete"] },
-      })
-        .populate("user", "name email")
-        .sort({ createdAt: -1 });
-
-      res.json({
-        total: logs.length,
-        data: logs,
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
     }
   }
 }

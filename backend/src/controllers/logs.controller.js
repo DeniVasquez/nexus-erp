@@ -45,7 +45,7 @@ export const logsReports = async (req, res) => {
       Log.find(filter)
         .select("-__v")
         .populate("user", "name email")
-        .populate("targetUser", "name email")
+        .populate("entityId", "-password -__v")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum),
@@ -112,30 +112,34 @@ export const deleteLogs = async (req, res) => {
   }
 };
 
-// Obtener historial de cambios de un usuario específico
-export const getUserHistory = async (req, res) => {
-  try {
-    const { userId } = req.params;
+// Historial de cambios de una entidad. Factory reutilizable para cualquier
+// modelo (usuarios, productos, roles, etc.): cada ruta define su propio
+// entityModel y el nombre del param de la URL donde viene el id.
+export const createEntityHistoryHandler = (entityModel, paramName = "id") => {
+  return async (req, res) => {
+    try {
+      const entityId = req.params[paramName];
 
-    // Obtener todos los logs donde este usuario fue afectado
-    const logs = await Log.find({
-      targetUser: userId,
-      action: { $in: ["create", "update", "delete"] }, // Solo cambios relevantes
-    })
-      .populate("user", "name email")
-      .populate("targetUser", "name email")
-      .sort({ createdAt: -1 }) // Más reciente primero
-      .select("-__v");
+      const logs = await Log.find({
+        entityId,
+        entityModel,
+        action: { $in: ["create", "update", "delete"] }, // Solo cambios relevantes
+      })
+        .populate("user", "name email")
+        .populate("entityId", "-password -__v")
+        .sort({ createdAt: -1 }) // Más reciente primero
+        .select("-__v");
 
-    res.status(200).json({
-      msj: "Historial obtenido",
-      total: logs.length,
-      data: logs,
-    });
-  } catch (error) {
-    res.status(500).json({
-      msj: "Error obteniendo historial",
-      error: error.message,
-    });
-  }
+      res.status(200).json({
+        msj: "Historial obtenido",
+        total: logs.length,
+        data: logs,
+      });
+    } catch (error) {
+      res.status(500).json({
+        msj: "Error obteniendo historial",
+        error: error.message,
+      });
+    }
+  };
 };
