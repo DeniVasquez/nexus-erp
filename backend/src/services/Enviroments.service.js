@@ -3,19 +3,32 @@ import dotenv from 'dotenv'
 //configuracion de dotenv
 dotenv.config()
 
-const envs = {
-    PORT: process.env.PORT,
-    MONGO_URI: process.env.MONGO_URI,
-    JWT_SECRET: process.env.JWT_SECRET,
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN
-}
+const envs = [
+    "PORT",
+    "MONGO_URI",
+    "JWT_SECRET",
+    "JWT_EXPIRES_IN"
+]
 
-Object.entries(envs).forEach(([key, value]) => {
-    if(!value) throw new Error(`Falta la variable de entorno: ${key}`)
+const criticalEnvs = [
+    "PORT",
+    "MONGO_URI",
+    "JWT_SECRET"
+]
+
+envs.forEach((env) => {
+    if(!process.env[env]) {
+        if(criticalEnvs.includes(env)) {
+            console.error(`Falta la variable de entorno crítica: ${env}`)
+            process.exit(1)
+        } 
+        
+        console.warn(`Falta la variable de entorno: ${env}`)
+    }
 })
 
 //importacion de variables de entorno
-export const port = envs.PORT
-export const url = envs.MONGO_URI
-export const jwt_secret = envs.JWT_SECRET
-export const jwt_expires = envs.JWT_EXPIRES_IN
+export const port = process.env.PORT
+export const url = process.env.MONGO_URI
+export const jwt_secret = process.env.JWT_SECRET
+export const jwt_expires = process.env.JWT_EXPIRES_IN
