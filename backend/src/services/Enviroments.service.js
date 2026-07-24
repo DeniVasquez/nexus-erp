@@ -1,10 +1,21 @@
-import dotevn from 'dotenv'
+import dotenv from 'dotenv'
 
 //configuracion de dotenv
-dotevn.config()
+dotenv.config()
+
+const envs = {
+    PORT: process.env.PORT,
+    MONGO_URI: process.env.MONGO_URI,
+    JWT_SECRET: process.env.JWT_SECRET,
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN
+}
+
+Object.entries(envs).forEach(([key, value]) => {
+    if(!value) throw new Error(`Falta la variable de entorno: ${key}`)
+})
 
 //importacion de variables de entorno
-export const port = process.env.PORT
-export const url = process.env.MONGOURL
-export const jwt_secret = process.env.JWT_SECRET
-export const jwt_expires = process.env.JWT_EXPIRES_IN
+export const port = envs.PORT
+export const url = envs.MONGO_URI
+export const jwt_secret = envs.JWT_SECRET
+export const jwt_expires = envs.JWT_EXPIRES_IN
