@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes, { userRoutes as userRoutesMetadata } from "./routes/users.routes.js";
 import rolesRoutes, { roleRoutes as roleRoutesMetadata } from "./routes/roles.routes.js";
 import logsRoutes, { logRoutes as logRoutesMetadata } from "./routes/logs.routes.js";
+import companiesRoutes, { companyRoutes as companyRoutesMetadata } from "./routes/companies.routes.js";
 
 // import de seeds
 import { seedRoles } from "./db/seedRoles.js";
@@ -46,7 +47,8 @@ mongoConnect().then(async () => {
   await seedPermissions([
     userRoutesMetadata,
     roleRoutesMetadata,
-    logRoutesMetadata
+    logRoutesMetadata,
+    companyRoutesMetadata
   ]);
 
   // Crear roles del sistema (solo si no existen)
@@ -65,3 +67,4 @@ server.use("/api", authRoutes);
 server.use("/api", userRoutes);
 server.use("/api/roles", rolesRoutes);
 server.use("/api", logsRoutes);
+server.use("/api/companies", companiesRoutes);
