@@ -165,7 +165,7 @@ export class CompanyController {
 
       res.status(200).json({
         msj: "Empresa actualizada correctamente",
-        user: updatedCompany,
+        company: updatedCompany,
       });
     } catch (error) {
       res.status(500).json({
@@ -194,7 +194,7 @@ export class CompanyController {
 
       res.status(200).json({
         msj: `Empresa ${company.isActive ? "activada" : "desactivada"} correctamente`,
-        user: company,
+        company,
       });
     } catch (error) {
       res.status(500).json({
@@ -220,7 +220,7 @@ export class CompanyController {
 
       res.status(200).json({
         msj: "Empresa eliminada correctamente",
-        user: company,
+        company,
       });
     } catch (error) {
       res.status(500).json({
