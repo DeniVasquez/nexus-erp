@@ -118,12 +118,6 @@ class ApiService {
     return this.request(`/logs${params ? `?${params}` : ""}`);
   }
 
-  async deleteLog(id) {
-    return this.request(`/logs/${id}`, {
-      method: "DELETE",
-    });
-  }
-
   async exportLogsToExcel(filters = {}) {
     const token = this.getToken();
     const params = new URLSearchParams(filters).toString();

@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { authMiddleware } from '../../../../middleware/auth.middleware.js';
-import { checkPermission } from '../../../../middleware/role.middleware.js';
-import { logAction } from '../../../../middleware/logger.middleware.js';
-import { createEntityHistoryHandler } from '../../../../controllers/logs.controller.js';
+import { authMiddleware } from '#shared/middleware/auth.middleware.js';
+import { checkPermission } from '#shared/middleware/checkPermission.middleware.js';
+import { logAction } from '#modules/logs/infrastructure/audit/logAction.middleware.js';
+import { createEntityHistoryHandler } from '#modules/logs/infrastructure/audit/entityHistory.handler.js';
 
 import { CompanyModel } from '../persistence/companyMongooseModel.js';
 import { MongoCompanyRepository } from '../persistence/MongoCompanyRepository.js';

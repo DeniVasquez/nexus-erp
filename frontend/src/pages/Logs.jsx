@@ -139,21 +139,6 @@ function Logs() {
     setShowDetailModal(true);
   };
 
-  const handleDelete = async (id) => {
-    showToast.confirm(
-      "¿Eliminar este log? Esta acción no se puede deshacer.",
-      async () => {
-        try {
-          await api.deleteLog(id);
-          refetch();
-          showToast.success("Log eliminado correctamente");
-        } catch (error) {
-          showToast.error(error.message);
-        }
-      },
-    );
-  };
-
   const handleDateChange = ({ startDate, endDate }) => {
     setFilterStartDate(startDate);
     setFilterEndDate(endDate);
@@ -364,11 +349,6 @@ function Logs() {
                       </th>
                       {/* Columna para botón "Ver" - siempre visible porque puede haber create/update/delete */}
                       <th class="px-6 py-3"></th>
-
-                      {/* Columna para botón "Eliminar" - solo si tiene permiso */}
-                      <Show when={auth.hasPermission("logs.delete")}>
-                        <th class="px-6 py-3"></th>
-                      </Show>
                     </tr>
                   </thead>
                   <tbody>
@@ -463,19 +443,6 @@ function Logs() {
                               </button>
                             </Show>
                           </td>
-                          {/*BOTÓN DE ELIMINAR */}
-                          <Show when={auth.hasPermission("logs.delete")}>
-                            <td class="px-6 py-4">
-                              <button
-                                onClick={() => handleDelete(log._id)}
-                                class="text-xs px-3 py-1.5 rounded-md border border-red-200
-                                       dark:border-red-500/30 text-red-600 dark:text-red-400
-                                       hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                              >
-                                Eliminar
-                              </button>
-                            </td>
-                          </Show>
                         </tr>
                       )}
                     </For>

@@ -1,20 +1,21 @@
 import express from "express";
-import { port } from "./services/Enviroments.service.js";
-import { mongoConnect } from "./db/config.js";
 import morgan from "morgan";
 import cors from "cors";
 
-// importamos las rutas nuevas con metadata
-import authRoutes from "./routes/auth.routes.js";
-import userRoutes, { userRoutes as userRoutesMetadata } from "./routes/users.routes.js";
-import rolesRoutes, { roleRoutes as roleRoutesMetadata } from "./routes/roles.routes.js";
-import logsRoutes, { logRoutes as logRoutesMetadata } from "./routes/logs.routes.js";
-import companiesRoutes, { companyRoutes as companyRoutesMetadata } from "./modules/companies/infrastructure/http/company.routes.js";
+import { port } from "#shared/lib/env.js";
+import { mongoConnect } from "#shared/lib/db.js";
 
-// import de seeds
-import { seedRoles } from "./db/seedRoles.js";
-import { seedPermissions } from "./db/seedPermissions.js";
-import { Role } from "./models/role.model.js";
+// rutas con metadata (para auto-discovery de permisos)
+import authRoutes from "#modules/auth/infrastructure/http/auth.routes.js";
+import userRoutes, { userRoutes as userRoutesMetadata } from "#modules/users/infrastructure/http/user.routes.js";
+import rolesRoutes, { roleRoutes as roleRoutesMetadata } from "#modules/roles/infrastructure/http/role.routes.js";
+import logsRoutes, { logRoutes as logRoutesMetadata } from "#modules/logs/infrastructure/http/log.routes.js";
+import companiesRoutes, { companyRoutes as companyRoutesMetadata } from "#modules/companies/infrastructure/http/company.routes.js";
+
+// bootstrap: sincronizar el catálogo de permisos y los roles del sistema
+import { MongoPermissionRepository } from "#modules/permissions/infrastructure/persistence/MongoPermissionRepository.js";
+import { SyncDiscoveredPermissionsUseCase } from "#modules/permissions/application/use-cases/syncDiscoveredPermissions.js";
+import { seedRoles } from "#modules/roles/infrastructure/seed/seedRoles.js";
 
 // Configurar servidor
 const server = express();
@@ -43,20 +44,14 @@ server.listen(port, () => {
 mongoConnect().then(async () => {
   console.log("MongoDB conectado");
 
-  // Auto-descubrir y sincronizar permisos
-  await seedPermissions([
-    userRoutesMetadata,
-    roleRoutesMetadata,
-    logRoutesMetadata,
-    companyRoutesMetadata
-  ]);
+  const routeModules = [userRoutesMetadata, roleRoutesMetadata, logRoutesMetadata, companyRoutesMetadata];
 
-  // Crear roles del sistema (solo si no existen)
-  const rolesCount = await Role.countDocuments();
-  if (rolesCount === 0) {
-    console.log("🌱 Creando roles del sistema...");
-    await seedRoles();
-  }
+  // Auto-descubrir y sincronizar permisos desde la metadata de las rutas
+  const syncDiscoveredPermissions = new SyncDiscoveredPermissionsUseCase(new MongoPermissionRepository());
+  const discoveredPermissionCodes = await syncDiscoveredPermissions.execute(routeModules);
+
+  // Sincronizar roles del sistema (admin siempre recibe todos los permisos descubiertos)
+  await seedRoles(discoveredPermissionCodes);
 });
 
 // Inicializar rutas

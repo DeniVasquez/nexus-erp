@@ -1,4 +1,4 @@
-import { discoverPermissions } from '#shared/lib/permissionDiscovery.js';
+import { discoverPermissions, groupPermissionsByResource } from '#shared/lib/permissionDiscovery.js';
 import { Permission } from '../../domain/Permission.js';
 
 /**
@@ -14,11 +14,19 @@ export class SyncDiscoveredPermissionsUseCase {
   }
 
   async execute(routeModules) {
+    console.log('🔍 Descubriendo permisos de las rutas...');
+
     const discovered = discoverPermissions(routeModules);
+    console.log(`✅ Descubiertos ${discovered.length} permisos únicos`);
 
     for (const perm of discovered) {
       await this.permissionRepository.upsertByCode(new Permission(perm));
     }
+
+    console.log('✅ Permisos sincronizados en base de datos');
+    console.log('📊 Permisos por recurso:', Object.fromEntries(
+      Object.entries(groupPermissionsByResource(discovered)).map(([resource, perms]) => [resource, perms.length])
+    ));
 
     return discovered.map((perm) => perm.code);
   }
