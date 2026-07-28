@@ -11,14 +11,26 @@ export class CompanyNotFoundError extends DomainError {
   }
 }
 
-export class DuplicateTaxIdError extends DomainError {
+export class DuplicateNitError extends DomainError {
   constructor() {
-    super('Ya existe una empresa con ese RFC/NIT');
+    super('Ya existe una empresa con ese NIT');
+  }
+}
+
+export class DuplicateNrcError extends DomainError {
+  constructor() {
+    super('Ya existe una empresa con ese NRC');
   }
 }
 
 export class InvalidCompanyIdError extends DomainError {
   constructor() {
     super('Id no válido');
+  }
+}
+
+export class InvalidLocationError extends DomainError {
+  constructor() {
+    super('Departamento, municipio o distrito no válidos');
   }
 }

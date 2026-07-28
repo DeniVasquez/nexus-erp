@@ -12,19 +12,19 @@ export class CompanyRepository {
     throw new Error('CompanyRepository.findById no implementado');
   }
 
-  async findByTaxId(_taxId) {
-    throw new Error('CompanyRepository.findByTaxId no implementado');
+  async findByNit(_nit) {
+    throw new Error('CompanyRepository.findByNit no implementado');
+  }
+
+  async findByNrc(_nrc) {
+    throw new Error('CompanyRepository.findByNrc no implementado');
   }
 
   async create(_company) {
     throw new Error('CompanyRepository.create no implementado');
   }
 
-  async update(_id, _company) {
+  async update(_id, _changes) {
     throw new Error('CompanyRepository.update no implementado');
-  }
-
-  async remove(_id) {
-    throw new Error('CompanyRepository.remove no implementado');
   }
 }

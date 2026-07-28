@@ -1,14 +1,26 @@
+import { isValidGeoLocation } from '#shared/lib/geoValidation.js';
 import { Company } from '../../domain/Company.js';
-import { DuplicateTaxIdError } from '../../domain/errors.js';
+import { DuplicateNitError, DuplicateNrcError, InvalidLocationError } from '../../domain/errors.js';
 
 export class CreateCompanyUseCase {
-  constructor(companyRepository) {
+  constructor(companyRepository, geoRepository) {
     this.companyRepository = companyRepository;
+    this.geoRepository = geoRepository;
   }
 
   async execute(data) {
-    const existing = await this.companyRepository.findByTaxId(data.taxId);
-    if (existing) throw new DuplicateTaxIdError();
+    const nitTaken = await this.companyRepository.findByNit(data.nit);
+    if (nitTaken) throw new DuplicateNitError();
+
+    const nrcTaken = await this.companyRepository.findByNrc(data.nrc);
+    if (nrcTaken) throw new DuplicateNrcError();
+
+    const validLocation = await isValidGeoLocation(this.geoRepository, {
+      departmentId: data.department,
+      municipalityId: data.municipality,
+      districtId: data.district,
+    });
+    if (!validLocation) throw new InvalidLocationError();
 
     const company = new Company(data);
     return this.companyRepository.create(company);

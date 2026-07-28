@@ -1,25 +1,32 @@
 import {
   InvalidCompanyIdError,
   CompanyNotFoundError,
-  DuplicateTaxIdError,
+  DuplicateNitError,
+  DuplicateNrcError,
+  InvalidLocationError,
 } from '../../domain/errors.js';
 
-// Traduce la entidad de dominio (que usa `id`) a la forma que ya consume el
-// frontend/consumidores actuales de la API (`_id`, estilo Mongo). Es tarea del
-// adaptador de interfaz mantener el contrato HTTP estable aunque el dominio
-// interno cambie.
+// Traduce la entidad de dominio (que usa `id`, y department/municipality/
+// district pueden venir como subdocumento poblado o como id crudo) a la
+// forma que consume el frontend.
 const toCompanyDTO = (company) => ({
   _id: company.id,
   id: company.id,
   name: company.name,
-  legalName: company.legalName,
-  taxId: company.taxId,
-  email: company.email,
-  phone: company.phone,
+  commercialName: company.commercialName,
+  nit: company.nit,
+  nrc: company.nrc,
+  commercialLine1: company.commercialLine1,
+  commercialLine2: company.commercialLine2,
+  commercialLine3: company.commercialLine3,
   address: company.address,
+  department: company.department,
+  municipality: company.municipality,
+  district: company.district,
+  phone: company.phone,
+  email: company.email,
+  webSite: company.webSite,
   logo: company.logo,
-  owner: company.owner,
-  plan: company.plan,
   isActive: company.isActive,
   createdAt: company.createdAt,
   updatedAt: company.updatedAt,
@@ -31,41 +38,47 @@ const pickDefinedFields = (body, keys) =>
     return changes;
   }, {});
 
+const COMPANY_FIELDS = [
+  'name',
+  'commercialName',
+  'nit',
+  'nrc',
+  'commercialLine1',
+  'commercialLine2',
+  'commercialLine3',
+  'address',
+  'department',
+  'municipality',
+  'district',
+  'phone',
+  'email',
+  'webSite',
+  'logo',
+];
+
 export class CompanyController {
-  constructor({
-    listCompanies,
-    getCompanyById,
-    createCompany,
-    updateCompany,
-    toggleCompanyStatus,
-    deleteCompany,
-  }) {
+  constructor({ listCompanies, getCompanyById, createCompany, updateCompany, toggleCompanyStatus }) {
     this.listCompaniesUseCase = listCompanies;
     this.getCompanyByIdUseCase = getCompanyById;
     this.createCompanyUseCase = createCompany;
     this.updateCompanyUseCase = updateCompany;
     this.toggleCompanyStatusUseCase = toggleCompanyStatus;
-    this.deleteCompanyUseCase = deleteCompany;
   }
 
   // Único lugar del módulo que traduce errores de dominio a códigos HTTP.
   #handleError(res, error, fallbackMsj) {
-    if (error instanceof InvalidCompanyIdError) {
-      return res.status(400).json({ msj: error.message });
-    }
-    if (error instanceof CompanyNotFoundError) {
-      return res.status(404).json({ msj: error.message });
-    }
-    if (error instanceof DuplicateTaxIdError) {
-      return res.status(400).json({ msj: error.message });
-    }
+    if (error instanceof InvalidCompanyIdError) return res.status(400).json({ msj: error.message });
+    if (error instanceof CompanyNotFoundError) return res.status(404).json({ msj: error.message });
+    if (error instanceof DuplicateNitError) return res.status(400).json({ msj: error.message });
+    if (error instanceof DuplicateNrcError) return res.status(400).json({ msj: error.message });
+    if (error instanceof InvalidLocationError) return res.status(400).json({ msj: error.message });
     return res.status(500).json({ msj: fallbackMsj, error: error.message });
   }
 
   getAll = async (req, res) => {
     try {
-      const { search, isActive, plan, page = 1, limit = 10 } = req.query;
-      const result = await this.listCompaniesUseCase.execute({ search, isActive, plan, page, limit });
+      const { search, isActive, page = 1, limit = 10 } = req.query;
+      const result = await this.listCompaniesUseCase.execute({ search, isActive, page, limit });
 
       res.status(200).json({
         msj: result.items.length === 0 ? 'lista de empresas vacia' : 'Empresas obtenidas correctamente',
@@ -96,7 +109,7 @@ export class CompanyController {
 
   create = async (req, res) => {
     try {
-      const data = { ...req.body, owner: req.body.owner || req.user.id };
+      const data = pickDefinedFields(req.body, COMPANY_FIELDS);
       const company = await this.createCompanyUseCase.execute(data);
       res.status(201).json({ msj: 'Empresa creada exitosamente', newCompany: toCompanyDTO(company) });
     } catch (error) {
@@ -106,17 +119,7 @@ export class CompanyController {
 
   update = async (req, res) => {
     try {
-      const changes = pickDefinedFields(req.body, [
-        'name',
-        'legalName',
-        'taxId',
-        'email',
-        'phone',
-        'address',
-        'logo',
-        'plan',
-        'isActive',
-      ]);
+      const changes = pickDefinedFields(req.body, [...COMPANY_FIELDS, 'isActive']);
       const company = await this.updateCompanyUseCase.execute(req.params.id, changes);
       res.status(200).json({ msj: 'Empresa actualizada correctamente', company: toCompanyDTO(company) });
     } catch (error) {
@@ -133,15 +136,6 @@ export class CompanyController {
       });
     } catch (error) {
       this.#handleError(res, error, 'Error al cambiar estado de la empresa');
-    }
-  };
-
-  delete = async (req, res) => {
-    try {
-      const company = await this.deleteCompanyUseCase.execute(req.params.id);
-      res.status(200).json({ msj: 'Empresa eliminada correctamente', company: toCompanyDTO(company) });
-    } catch (error) {
-      this.#handleError(res, error, 'Error eliminando empresa');
     }
   };
 }

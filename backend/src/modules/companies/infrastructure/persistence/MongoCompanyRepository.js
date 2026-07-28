@@ -9,14 +9,20 @@ const toDomain = (doc) =>
         ? new Company({
               id: doc._id.toString(),
               name: doc.name,
-              legalName: doc.legalName,
-              taxId: doc.taxId,
-              email: doc.email,
-              phone: doc.phone,
+              commercialName: doc.commercialName,
+              nit: doc.nit,
+              nrc: doc.nrc,
+              commercialLine1: doc.commercialLine1,
+              commercialLine2: doc.commercialLine2,
+              commercialLine3: doc.commercialLine3,
               address: doc.address,
+              department: doc.department,
+              municipality: doc.municipality,
+              district: doc.district,
+              phone: doc.phone,
+              email: doc.email,
+              webSite: doc.webSite,
               logo: doc.logo,
-              owner: doc.owner,
-              plan: doc.plan,
               isActive: doc.isActive,
               createdAt: doc.createdAt,
               updatedAt: doc.updatedAt,
@@ -29,20 +35,27 @@ const assertValidId = (id) => {
     }
 };
 
+const GEO_POPULATE = [
+    { path: 'department', select: 'code name shortName' },
+    { path: 'municipality', select: 'code name' },
+    { path: 'district', select: 'code name' },
+];
+
 /**
  * Adaptador concreto del puerto CompanyRepository usando Mongoose. Es el único
  * archivo del módulo que conoce sintaxis de Mongo ($regex, $or, populate,
  * ObjectId). El dominio y los casos de uso no saben que esta clase existe.
  */
 export class MongoCompanyRepository extends CompanyRepository {
-    async findAll({ search, isActive, plan, page = 1, limit = 10 } = {}) {
+    async findAll({ search, isActive, page = 1, limit = 10 } = {}) {
         const filter = {};
 
         if (search) {
             filter.$or = [
                 { name: { $regex: search, $options: 'i' } },
-                { legalName: { $regex: search, $options: 'i' } },
-                { taxId: { $regex: search, $options: 'i' } },
+                { commercialName: { $regex: search, $options: 'i' } },
+                { nit: { $regex: search, $options: 'i' } },
+                { nrc: { $regex: search, $options: 'i' } },
             ];
         }
 
@@ -50,14 +63,12 @@ export class MongoCompanyRepository extends CompanyRepository {
             filter.isActive = isActive === true || isActive === 'true';
         }
 
-        if (plan) filter.plan = plan;
-
         const skip = (page - 1) * limit;
 
         const [docs, total] = await Promise.all([
             CompanyModel.find(filter)
                 .select('-__v')
-                .populate('owner', 'name email')
+                .populate(GEO_POPULATE)
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit),
@@ -69,28 +80,40 @@ export class MongoCompanyRepository extends CompanyRepository {
 
     async findById(id) {
         assertValidId(id);
-        const doc = await CompanyModel.findById(id).populate('owner', 'name email');
+        const doc = await CompanyModel.findById(id).populate(GEO_POPULATE);
         return toDomain(doc);
     }
 
-    async findByTaxId(taxId) {
-        const doc = await CompanyModel.findOne({ taxId: taxId?.toUpperCase() });
+    async findByNit(nit) {
+        const doc = await CompanyModel.findOne({ nit });
+        return toDomain(doc);
+    }
+
+    async findByNrc(nrc) {
+        const doc = await CompanyModel.findOne({ nrc });
         return toDomain(doc);
     }
 
     async create(company) {
         const doc = await CompanyModel.create({
             name: company.name,
-            legalName: company.legalName,
-            taxId: company.taxId,
-            email: company.email,
-            phone: company.phone,
+            commercialName: company.commercialName,
+            nit: company.nit,
+            nrc: company.nrc,
+            commercialLine1: company.commercialLine1,
+            commercialLine2: company.commercialLine2,
+            commercialLine3: company.commercialLine3,
             address: company.address,
+            department: company.department,
+            municipality: company.municipality,
+            district: company.district,
+            phone: company.phone,
+            email: company.email,
+            webSite: company.webSite,
             logo: company.logo,
-            plan: company.plan,
-            owner: company.owner,
         });
-        return toDomain(doc);
+        const populated = await doc.populate(GEO_POPULATE);
+        return toDomain(populated);
     }
 
     async update(id, changes) {
@@ -98,13 +121,7 @@ export class MongoCompanyRepository extends CompanyRepository {
         const doc = await CompanyModel.findByIdAndUpdate(id, changes, {
             new: true,
             runValidators: true,
-        }).populate('owner', 'name email');
-        return toDomain(doc);
-    }
-
-    async remove(id) {
-        assertValidId(id);
-        const doc = await CompanyModel.findByIdAndDelete(id);
+        }).populate(GEO_POPULATE);
         return toDomain(doc);
     }
 }
