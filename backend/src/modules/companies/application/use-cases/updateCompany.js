@@ -1,4 +1,4 @@
-import { isValidGeoLocation } from '#shared/lib/geoValidation.js';
+import { isValidGeoLocation, extractGeoId } from '#shared/lib/geoValidation.js';
 import { CompanyNotFoundError, DuplicateNitError, DuplicateNrcError, InvalidLocationError } from '../../domain/errors.js';
 
 export class UpdateCompanyUseCase {
@@ -25,9 +25,9 @@ export class UpdateCompanyUseCase {
     // (no permitimos, por ejemplo, cambiar el municipio y dejar el distrito viejo).
     if (changes.department || changes.municipality || changes.district) {
       const validLocation = await isValidGeoLocation(this.geoRepository, {
-        departmentId: changes.department || company.department,
-        municipalityId: changes.municipality || company.municipality,
-        districtId: changes.district || company.district,
+        departmentId: changes.department || extractGeoId(company.department),
+        municipalityId: changes.municipality || extractGeoId(company.municipality),
+        districtId: changes.district || extractGeoId(company.district),
       });
       if (!validLocation) throw new InvalidLocationError();
     }

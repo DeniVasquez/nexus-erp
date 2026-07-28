@@ -57,12 +57,13 @@ const COMPANY_FIELDS = [
 ];
 
 export class CompanyController {
-  constructor({ listCompanies, getCompanyById, createCompany, updateCompany, toggleCompanyStatus }) {
+  constructor({ listCompanies, getCompanyById, createCompany, updateCompany, activateCompany, deactivateCompany }) {
     this.listCompaniesUseCase = listCompanies;
     this.getCompanyByIdUseCase = getCompanyById;
     this.createCompanyUseCase = createCompany;
     this.updateCompanyUseCase = updateCompany;
-    this.toggleCompanyStatusUseCase = toggleCompanyStatus;
+    this.activateCompanyUseCase = activateCompany;
+    this.deactivateCompanyUseCase = deactivateCompany;
   }
 
   // Único lugar del módulo que traduce errores de dominio a códigos HTTP.
@@ -127,15 +128,21 @@ export class CompanyController {
     }
   };
 
-  toggleStatus = async (req, res) => {
+  activate = async (req, res) => {
     try {
-      const company = await this.toggleCompanyStatusUseCase.execute(req.params.id);
-      res.status(200).json({
-        msj: `Empresa ${company.isActive ? 'activada' : 'desactivada'} correctamente`,
-        company: toCompanyDTO(company),
-      });
+      const company = await this.activateCompanyUseCase.execute(req.params.id);
+      res.status(200).json({ msj: 'Empresa activada correctamente', company: toCompanyDTO(company) });
     } catch (error) {
-      this.#handleError(res, error, 'Error al cambiar estado de la empresa');
+      this.#handleError(res, error, 'Error al activar la empresa');
+    }
+  };
+
+  deactivate = async (req, res) => {
+    try {
+      const company = await this.deactivateCompanyUseCase.execute(req.params.id);
+      res.status(200).json({ msj: 'Empresa desactivada correctamente', company: toCompanyDTO(company) });
+    } catch (error) {
+      this.#handleError(res, error, 'Error al desactivar la empresa');
     }
   };
 }

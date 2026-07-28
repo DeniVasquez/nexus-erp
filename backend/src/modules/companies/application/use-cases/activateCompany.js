@@ -1,6 +1,6 @@
 import { CompanyNotFoundError } from '../../domain/errors.js';
 
-export class ToggleCompanyStatusUseCase {
+export class ActivateCompanyUseCase {
   constructor(companyRepository) {
     this.companyRepository = companyRepository;
   }
@@ -9,7 +9,6 @@ export class ToggleCompanyStatusUseCase {
     const company = await this.companyRepository.findById(id);
     if (!company) throw new CompanyNotFoundError();
 
-    company.toggleStatus();
-    return this.companyRepository.update(id, { isActive: company.isActive });
+    return this.companyRepository.update(id, { isActive: true });
   }
 }

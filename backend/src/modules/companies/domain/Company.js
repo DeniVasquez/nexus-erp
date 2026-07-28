@@ -40,9 +40,4 @@ export class Company {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
-
-  toggleStatus() {
-    this.isActive = !this.isActive;
-    return this.isActive;
-  }
 }

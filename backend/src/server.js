@@ -12,6 +12,7 @@ import rolesRoutes, { roleRoutes as roleRoutesMetadata } from "#modules/roles/in
 import logsRoutes, { logRoutes as logRoutesMetadata } from "#modules/logs/infrastructure/http/log.routes.js";
 import companiesRoutes, { companyRoutes as companyRoutesMetadata } from "#modules/companies/infrastructure/http/company.routes.js";
 import geoRoutes, { geoRoutes as geoRoutesMetadata } from "#modules/geo/infrastructure/http/geo.routes.js";
+import branchesRoutes, { branchRoutes as branchRoutesMetadata } from "#modules/branches/infrastructure/http/branch.routes.js";
 
 // bootstrap: sincronizar el catálogo de permisos y los roles del sistema
 import { MongoPermissionRepository } from "#modules/permissions/infrastructure/persistence/MongoPermissionRepository.js";
@@ -48,7 +49,7 @@ mongoConnect().then(async () => {
 
   await seedGeo();
 
-  const routeModules = [userRoutesMetadata, roleRoutesMetadata, logRoutesMetadata, companyRoutesMetadata, geoRoutesMetadata];
+  const routeModules = [userRoutesMetadata, roleRoutesMetadata, logRoutesMetadata, companyRoutesMetadata, geoRoutesMetadata, branchRoutesMetadata];
 
   // Auto-descubrir y sincronizar permisos desde la metadata de las rutas
   const syncDiscoveredPermissions = new SyncDiscoveredPermissionsUseCase(new MongoPermissionRepository());
@@ -68,3 +69,4 @@ server.use("/api/roles", rolesRoutes);
 server.use("/api", logsRoutes);
 server.use("/api/companies", companiesRoutes);
 server.use("/api/geo", geoRoutes);
+server.use("/api/branches", branchesRoutes);

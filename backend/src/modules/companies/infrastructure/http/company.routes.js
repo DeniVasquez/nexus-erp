@@ -11,7 +11,8 @@ import { ListCompaniesUseCase } from '../../application/use-cases/listCompanies.
 import { GetCompanyByIdUseCase } from '../../application/use-cases/getCompanyById.js';
 import { CreateCompanyUseCase } from '../../application/use-cases/createCompany.js';
 import { UpdateCompanyUseCase } from '../../application/use-cases/updateCompany.js';
-import { ToggleCompanyStatusUseCase } from '../../application/use-cases/toggleCompanyStatus.js';
+import { ActivateCompanyUseCase } from '../../application/use-cases/activateCompany.js';
+import { DeactivateCompanyUseCase } from '../../application/use-cases/deactivateCompany.js';
 import { CompanyController } from './company.controller.js';
 
 // --- Composition root: aquí, y solo aquí, se conectan las piezas concretas ---
@@ -25,7 +26,8 @@ const controller = new CompanyController({
     getCompanyById: new GetCompanyByIdUseCase(companyRepository),
     createCompany: new CreateCompanyUseCase(companyRepository, geoRepository),
     updateCompany: new UpdateCompanyUseCase(companyRepository, geoRepository),
-    toggleCompanyStatus: new ToggleCompanyStatusUseCase(companyRepository),
+    activateCompany: new ActivateCompanyUseCase(companyRepository),
+    deactivateCompany: new DeactivateCompanyUseCase(companyRepository),
 });
 
 const router = Router();
@@ -39,9 +41,10 @@ const companyAudit = {
     compareFields: ['name', 'commercialName', 'nit', 'nrc', 'email', 'phone', 'isActive']
 };
 
-// rutas con metadata. Nota: el ERS solo define companies.view/create/update/
-// activate/deactivate (ver 6.3.7) — no hay companies.delete, por eso este
-// módulo no expone un DELETE físico, solo toggle-status.
+// rutas con metadata. Nota: el ERS define companies.view/create/update/
+// activate/deactivate como permisos SEPARADOS (ver 6.3.7) — no hay
+// companies.delete (por eso no hay DELETE físico), y activar/desactivar
+// son dos endpoints con su propio permiso, no un solo toggle bajo `update`.
 const routes = [
     {
         method: 'GET',
@@ -85,10 +88,18 @@ const routes = [
     },
     {
         method: 'PATCH',
-        path: '/:id/toggle-status',
-        permission: 'companies.update',
-        description: 'Activar/Desactivar empresa',
-        handler: controller.toggleStatus,
+        path: '/:id/activate',
+        permission: 'companies.activate',
+        description: 'Activar empresa',
+        handler: controller.activate,
+        middlewares: [logAction({ ...companyAudit, action: 'update', resource: 'companies', responseKey: 'company' })]
+    },
+    {
+        method: 'PATCH',
+        path: '/:id/deactivate',
+        permission: 'companies.deactivate',
+        description: 'Desactivar empresa',
+        handler: controller.deactivate,
         middlewares: [logAction({ ...companyAudit, action: 'update', resource: 'companies', responseKey: 'company' })]
     }
 ];
