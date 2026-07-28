@@ -2,9 +2,7 @@ import { Router } from 'express';
 import { authMiddleware } from '#shared/middleware/auth.middleware.js';
 import { checkPermission } from '#shared/middleware/checkPermission.middleware.js';
 
-// Bridge temporal: el módulo permissions todavía no existe (paso 4), así que
-// GET /roles/permissions sigue sirviendo desde el controller viejo hasta ese paso.
-import { getAllPermissions } from '../../../../controllers/permission.controller.js';
+import { getAllPermissionsHandler } from '#modules/permissions/infrastructure/http/getAllPermissionsHandler.js';
 // Bridge temporal: el módulo users todavía no existe (paso 5), así que contar
 // usuarios por rol para el borrado sigue contra el modelo viejo hasta ese paso.
 import { userModel } from '../../../../models/user.model.js';
@@ -46,7 +44,7 @@ const routes = [
         path: '/permissions',
         permission: 'roles.read',
         description: 'Obtener permisos disponibles',
-        handler: getAllPermissions,
+        handler: getAllPermissionsHandler,
         middlewares: []
     },
     {
