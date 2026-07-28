@@ -1,0 +1,30 @@
+/**
+ * Puerto que el dominio/aplicación usan para persistir Role. No sabe nada de
+ * Mongo/Mongoose: cualquier adaptador de infraestructura que implemente estos
+ * métodos sirve.
+ */
+export class RoleRepository {
+  async findAll(_criteria) {
+    throw new Error('RoleRepository.findAll no implementado');
+  }
+
+  async findById(_id) {
+    throw new Error('RoleRepository.findById no implementado');
+  }
+
+  async findByName(_name) {
+    throw new Error('RoleRepository.findByName no implementado');
+  }
+
+  async create(_role) {
+    throw new Error('RoleRepository.create no implementado');
+  }
+
+  async update(_id, _changes) {
+    throw new Error('RoleRepository.update no implementado');
+  }
+
+  async remove(_id) {
+    throw new Error('RoleRepository.remove no implementado');
+  }
+}

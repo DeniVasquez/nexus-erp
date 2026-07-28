@@ -1,5 +1,5 @@
 import { verifyToken } from '#shared/lib/jwt.js'
-import { Role } from '../../models/role.model.js'
+import { RoleModel as Role } from '#modules/roles/infrastructure/persistence/roleMongooseModel.js'
 
 export const authMiddleware = async (req, res, next) => {
     try {
