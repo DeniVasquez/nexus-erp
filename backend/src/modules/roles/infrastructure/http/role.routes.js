@@ -3,9 +3,7 @@ import { authMiddleware } from '#shared/middleware/auth.middleware.js';
 import { checkPermission } from '#shared/middleware/checkPermission.middleware.js';
 
 import { getAllPermissionsHandler } from '#modules/permissions/infrastructure/http/getAllPermissionsHandler.js';
-// Bridge temporal: el módulo users todavía no existe (paso 5), así que contar
-// usuarios por rol para el borrado sigue contra el modelo viejo hasta ese paso.
-import { userModel } from '../../../../models/user.model.js';
+import { MongoUserRepository } from '#modules/users/infrastructure/persistence/MongoUserRepository.js';
 
 import { MongoRoleRepository } from '../persistence/MongoRoleRepository.js';
 import { ListRolesUseCase } from '../../application/use-cases/listRoles.js';
@@ -17,7 +15,8 @@ import { RoleController } from './role.controller.js';
 
 // --- Composition root: aquí, y solo aquí, se conectan las piezas concretas ---
 const roleRepository = new MongoRoleRepository();
-const countUsersWithRole = (roleId) => userModel.countDocuments({ role: roleId });
+const userRepository = new MongoUserRepository();
+const countUsersWithRole = (roleId) => userRepository.countByRole(roleId);
 
 const controller = new RoleController({
     listRoles: new ListRolesUseCase(roleRepository),

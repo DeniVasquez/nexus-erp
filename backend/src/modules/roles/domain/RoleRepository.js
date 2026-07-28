@@ -16,6 +16,13 @@ export class RoleRepository {
     throw new Error('RoleRepository.findByName no implementado');
   }
 
+  // Resuelve un rol ya sea que `value` sea un id o un nombre. Lo usa el
+  // módulo users al crear/registrar cuentas, donde el campo "role" puede
+  // venir como cualquiera de los dos desde el cliente.
+  async findByIdOrName(_value) {
+    throw new Error('RoleRepository.findByIdOrName no implementado');
+  }
+
   async create(_role) {
     throw new Error('RoleRepository.create no implementado');
   }

@@ -56,6 +56,16 @@ export class MongoRoleRepository extends RoleRepository {
         return toDomain(doc);
     }
 
+    async findByIdOrName(value) {
+        if (mongoose.Types.ObjectId.isValid(value)) {
+            const doc = await RoleModel.findById(value);
+            if (doc) return toDomain(doc);
+        }
+
+        const doc = await RoleModel.findOne({ name: value?.toLowerCase() || 'user' });
+        return toDomain(doc);
+    }
+
     async create(role) {
         const doc = await RoleModel.create({
             name: role.name,
