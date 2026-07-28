@@ -4,6 +4,10 @@
   "description": "",
   "main": "server.js",
   "type": "module",
+  "imports": {
+    "#shared/*": "./src/shared/*",
+    "#modules/*": "./src/modules/*"
+  },
   "scripts": {
     "dev": "nodemon src/server.js"
   },
