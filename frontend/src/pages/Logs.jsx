@@ -377,11 +377,7 @@ function Logs() {
                           </td>
                           <td class="px-6 py-4">
                             <Show
-                              when={
-                                log.targetUserName ||
-                                log.targetUser ||
-                                log.action === "logout"
-                              }
+                              when={log.entityName || log.entityId}
                               fallback={
                                 <span class="text-xs text-gray-400 italic">
                                   -
@@ -390,23 +386,13 @@ function Logs() {
                             >
                               <div>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                  {log.action === "logout"
-                                    ? log.user?.name
-                                    : log.targetUserName ||
-                                      log.targetUser?.name ||
-                                      "Usuario"}
+                                  {log.entityName ||
+                                    log.entityId?.name ||
+                                    "Usuario"}
                                 </p>
-                                <Show
-                                  when={
-                                    log.action === "logout"
-                                      ? log.user?.email
-                                      : log.targetUser?.email
-                                  }
-                                >
+                                <Show when={log.entityId?.email}>
                                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {log.action === "logout"
-                                      ? log.user?.email
-                                      : log.targetUser?.email}
+                                    {log.entityId?.email}
                                   </p>
                                 </Show>
                               </div>
@@ -512,7 +498,9 @@ function Logs() {
                   Usuario afectado:
                 </p>
                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                  {selectedLog()?.targetUserName || "Desconocido"}
+                  {selectedLog()?.entityName ||
+                    selectedLog()?.entityId?.name ||
+                    "Desconocido"}
                 </p>
               </div>
 
