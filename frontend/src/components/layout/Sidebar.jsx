@@ -47,6 +47,23 @@ function Sidebar() {
           Dashboard
         </A>
 
+        {/* Empresas - raíz de la jerarquía organizacional (Company > Branch > Warehouse > Location) */}
+        <Show when={auth.hasPermission('companies.read')}>
+          <div class="pt-4 pb-1">
+            <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">
+              Organización
+            </p>
+          </div>
+
+          <A href="/companies" class={navLinkClass('/companies')}>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2M19 21H5m0 0H3m8-14h.01M11 11h.01M11 15h.01M15 7h.01M15 11h.01M15 15h.01" />
+            </svg>
+            Empresas
+          </A>
+        </Show>
+
         {/* Mostrar según PERMISOS, no por rol */}
         <Show when={auth.hasPermission('users.read') || auth.hasPermission('users.create') || auth.hasPermission('users.update')}>
           <div class="pt-4 pb-1">
