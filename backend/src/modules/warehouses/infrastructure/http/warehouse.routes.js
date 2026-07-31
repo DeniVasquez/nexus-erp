@@ -35,7 +35,7 @@ const router = Router();
 const warehouseAudit = {
     entityModel: WarehouseModel,
     snapshot: { fields: ['branch', 'warehouseCategory', 'name', 'description', 'isActive'] },
-    compareFields: ['name', 'description', 'isActive']
+    compareFields: ['name', 'description', 'warehouseCategory', 'isActive']
 };
 
 // rutas con metadata. ERS 6.5.7: warehouses.view/create/update/activate/

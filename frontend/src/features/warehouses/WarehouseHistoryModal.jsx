@@ -4,11 +4,13 @@ import { warehousesApi } from "../../services/warehouses.api";
 const FIELD_LABELS = {
   name: "Nombre",
   description: "Descripción",
+  warehouseCategory: "Categoría",
   isActive: "Estado",
 };
 
 const formatValue = (field, value) => {
   if (field === "isActive") return value ? "Activo" : "Inactivo";
+  if (value && typeof value === "object") return value.name || "-";
   return value || "-";
 };
 
@@ -140,8 +142,8 @@ function WarehouseHistoryModal(props) {
                         }
                       >
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                          Se actualizó la categoría del almacén (sin cambios en
-                          nombre, descripción o estado).
+                          Actualización sin cambios en los campos
+                          monitoreados.
                         </p>
                       </Show>
                     </div>
