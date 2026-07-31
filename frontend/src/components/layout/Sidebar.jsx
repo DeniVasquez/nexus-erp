@@ -74,6 +74,23 @@ function Sidebar() {
           </A>
         </Show>
 
+        {/* Almacenes - estructura física dentro de una sucursal (ERS 6.5) */}
+        <Show when={auth.hasPermission('warehouse_categories.view')}>
+          <div class="pt-4 pb-1">
+            <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">
+              Almacenes
+            </p>
+          </div>
+
+          <A href="/warehouse-categories" class={navLinkClass('/warehouse-categories')}>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            Categorías de almacén
+          </A>
+        </Show>
+
         {/* Mostrar según PERMISOS, no por rol */}
         <Show when={auth.hasPermission('users.read') || auth.hasPermission('users.create') || auth.hasPermission('users.update')}>
           <div class="pt-4 pb-1">

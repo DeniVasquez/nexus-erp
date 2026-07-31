@@ -12,6 +12,9 @@ const Logs = lazy(() => import("./pages/Logs"));
 const Roles = lazy(() => import("./pages/Roles"));
 const Companies = lazy(() => import("./features/companies/Companies"));
 const Branches = lazy(() => import("./features/branches/Branches"));
+const WarehouseCategories = lazy(() =>
+  import("./features/warehouse-categories/WarehouseCategories"),
+);
 
 function App() {
   return (
@@ -27,6 +30,10 @@ function App() {
           <Route path="/roles" component={Roles} />
           <Route path="/companies" component={Companies} />
           <Route path="/branches" component={Branches} />
+          <Route
+            path="/warehouse-categories"
+            component={WarehouseCategories}
+          />
           <Route path="/" component={Login} />
         </SolidRouter>
       </AuthProvider>
