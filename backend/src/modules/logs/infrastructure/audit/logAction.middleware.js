@@ -1,4 +1,4 @@
-import { fetchEntitySnapshot } from '#shared/lib/entitySnapshot.js';
+import { fetchEntitySnapshot, toPlainValue } from '#shared/lib/entitySnapshot.js';
 import { diffFields } from '#shared/lib/objectDiff.js';
 import { MongoLogRepository } from '../persistence/MongoLogRepository.js';
 import { WriteLogEntryUseCase } from '../../application/use-cases/writeLogEntry.js';
@@ -57,7 +57,7 @@ export const logAction = ({
                     logData.dataAfter = action === 'delete'
                         ? null
                         : fields.reduce((snapshot, field) => {
-                            snapshot[field] = entity[field];
+                            snapshot[field] = toPlainValue(entity[field]);
                             return snapshot;
                         }, {});
 

@@ -4,6 +4,9 @@ import { branchesApi } from "../../services/branches.api";
 const FIELD_LABELS = {
   name: "Nombre",
   address: "Dirección",
+  department: "Departamento",
+  municipality: "Municipio",
+  district: "Distrito",
   phone: "Teléfono",
   email: "Correo electrónico",
   isActive: "Estado",
@@ -11,6 +14,7 @@ const FIELD_LABELS = {
 
 const formatValue = (field, value) => {
   if (field === "isActive") return value ? "Activo" : "Inactivo";
+  if (value && typeof value === "object") return value.name || "-";
   return value || "-";
 };
 

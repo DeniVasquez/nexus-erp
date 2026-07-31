@@ -7,6 +7,58 @@ import { showToast } from "../utils/toast";
 import DateRangePicker from "../components/DateRangePicker";
 import Pagination from "../components/Pagination";
 
+// Etiquetas de campo combinadas de todos los módulos auditados (users,
+// companies, branches, warehouse_categories, warehouses, locations). Esta
+// página es genérica/transversal (ERS 6.2), a diferencia de los modales de
+// historial por entidad que solo conocen los campos de su propio módulo.
+const FIELD_LABELS = {
+  name: "Nombre",
+  email: "Correo electrónico",
+  role: "Rol",
+  commercialName: "Nombre comercial",
+  nit: "NIT",
+  nrc: "NRC",
+  commercialLine1: "Giro comercial principal",
+  commercialLine2: "Giro comercial secundario",
+  commercialLine3: "Giro comercial adicional",
+  address: "Dirección",
+  department: "Departamento",
+  municipality: "Municipio",
+  district: "Distrito",
+  phone: "Teléfono",
+  webSite: "Sitio web",
+  logo: "Logo",
+  description: "Descripción",
+  warehouseCategory: "Categoría de almacén",
+  code: "Código",
+  aisle: "Pasillo",
+  rack: "Estante",
+  level: "Nivel",
+  position: "Posición",
+  capacity: "Capacidad",
+  isActive: "Estado",
+};
+
+// label con género correcto para el título de la modal ("Empresa creada" vs
+// "Almacén creado"); RESOURCE_LABEL solo para el encabezado de secciones.
+const RESOURCE_META = {
+  users: { label: "Usuario", created: "creado", updated: "actualizado", deleted: "eliminado" },
+  companies: { label: "Empresa", created: "creada", updated: "actualizada", deleted: "eliminada" },
+  branches: { label: "Sucursal", created: "creada", updated: "actualizada", deleted: "eliminada" },
+  warehouse_categories: { label: "Categoría de almacén", created: "creada", updated: "actualizada", deleted: "eliminada" },
+  warehouses: { label: "Almacén", created: "creado", updated: "actualizado", deleted: "eliminado" },
+  locations: { label: "Ubicación", created: "creada", updated: "actualizada", deleted: "eliminada" },
+  auth: { label: "Sesión", created: "creada", updated: "actualizada", deleted: "eliminada" },
+};
+
+const resourceMeta = (resource) => RESOURCE_META[resource] || { label: "Registro", created: "creado", updated: "actualizado", deleted: "eliminado" };
+
+const formatFieldValue = (field, value) => {
+  if (field === "isActive") return value ? "Activo" : "Inactivo";
+  if (value && typeof value === "object") return value.name || "-";
+  return value || value === 0 ? value : "-";
+};
+
 function Logs() {
   const auth = useAuth();
 
@@ -207,9 +259,13 @@ function Logs() {
                 onChange={(e) => setFilterResource(e.target.value)}
               >
                 <option value="">Todos los recursos</option>
-                <option value="users">Users</option>
-                <option value="auth">Auth</option>
-                <option value="logs">Logs</option>
+                <option value="users">Usuarios</option>
+                <option value="companies">Empresas</option>
+                <option value="branches">Sucursales</option>
+                <option value="warehouse_categories">Categorías de almacén</option>
+                <option value="warehouses">Almacenes</option>
+                <option value="locations">Ubicaciones</option>
+                <option value="auth">Autenticación</option>
               </select>
 
               <DateRangePicker
@@ -339,7 +395,7 @@ function Logs() {
                         Recurso
                       </th>
                       <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Usuario Afectado
+                        Registro Afectado
                       </th>
                       <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Status
@@ -388,7 +444,7 @@ function Logs() {
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
                                   {log.entityName ||
                                     log.entityId?.name ||
-                                    "Usuario"}
+                                    resourceMeta(log.resource).label}
                                 </p>
                                 <Show when={log.entityId?.email}>
                                   <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -461,10 +517,12 @@ function Logs() {
                   Detalles del cambio
                 </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {selectedLog()?.action === "create" && "✨ Usuario creado"}
+                  {selectedLog()?.action === "create" &&
+                    `✨ ${resourceMeta(selectedLog()?.resource).label} ${resourceMeta(selectedLog()?.resource).created}`}
                   {selectedLog()?.action === "update" &&
-                    "✏️ Usuario actualizado"}
-                  {selectedLog()?.action === "delete" && "🗑️ Usuario eliminado"}
+                    `✏️ ${resourceMeta(selectedLog()?.resource).label} ${resourceMeta(selectedLog()?.resource).updated}`}
+                  {selectedLog()?.action === "delete" &&
+                    `🗑️ ${resourceMeta(selectedLog()?.resource).label} ${resourceMeta(selectedLog()?.resource).deleted}`}
                   {" • "}
                   {new Date(selectedLog()?.createdAt).toLocaleString("es-ES")}
                 </p>
@@ -492,10 +550,10 @@ function Logs() {
                 </p>
               </div>
 
-              {/* Usuario afectado */}
+              {/* Registro afectado */}
               <div class="mb-6">
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  Usuario afectado:
+                  {resourceMeta(selectedLog()?.resource).label} afectado:
                 </p>
                 <p class="text-sm font-medium text-gray-900 dark:text-white">
                   {selectedLog()?.entityName ||
@@ -514,36 +572,20 @@ function Logs() {
                   <p class="text-xs font-semibold text-green-700 dark:text-green-400 mb-3">
                     Datos iniciales:
                   </p>
-                  <Show when={selectedLog()?.dataAfter.name}>
-                    <div class="flex justify-between">
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
-                        Nombre:
-                      </span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {selectedLog()?.dataAfter.name}
-                      </span>
-                    </div>
-                  </Show>
-                  <Show when={selectedLog()?.dataAfter.email}>
-                    <div class="flex justify-between">
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
-                        Email:
-                      </span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {selectedLog()?.dataAfter.email}
-                      </span>
-                    </div>
-                  </Show>
-                  <Show when={selectedLog()?.dataAfter.role}>
-                    <div class="flex justify-between">
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
-                        Rol:
-                      </span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {selectedLog()?.dataAfter.role}
-                      </span>
-                    </div>
-                  </Show>
+                  <For each={Object.keys(FIELD_LABELS)}>
+                    {(field) => (
+                      <Show when={selectedLog()?.dataAfter[field] !== undefined}>
+                        <div class="flex justify-between gap-3">
+                          <span class="text-sm text-gray-600 dark:text-gray-400">
+                            {FIELD_LABELS[field]}:
+                          </span>
+                          <span class="text-sm font-medium text-gray-900 dark:text-white text-right">
+                            {formatFieldValue(field, selectedLog()?.dataAfter[field])}
+                          </span>
+                        </div>
+                      </Show>
+                    )}
+                  </For>
                 </div>
               </Show>
 
@@ -563,26 +605,15 @@ function Logs() {
                     {(field) => (
                       <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                          {field === "name" && "Nombre"}
-                          {field === "email" && "Email"}
-                          {field === "role" && "Rol"}
-                          {field === "isActive" && "Estado"}
+                          {FIELD_LABELS[field] || field}
                         </p>
                         <div class="flex items-center gap-3">
                           <span class="text-sm text-red-600 dark:text-red-400 line-through flex-1">
-                            {field === "isActive"
-                              ? selectedLog()?.dataBefore?.[field]
-                                ? "Activo"
-                                : "Inactivo"
-                              : selectedLog()?.dataBefore?.[field] || "-"}
+                            {formatFieldValue(field, selectedLog()?.dataBefore?.[field])}
                           </span>
                           <span class="text-gray-400">→</span>
                           <span class="text-sm text-green-600 dark:text-green-400 font-medium flex-1 text-right">
-                            {field === "isActive"
-                              ? selectedLog()?.dataAfter?.[field]
-                                ? "Activo"
-                                : "Inactivo"
-                              : selectedLog()?.dataAfter?.[field] || "-"}
+                            {formatFieldValue(field, selectedLog()?.dataAfter?.[field])}
                           </span>
                         </div>
                       </div>
@@ -600,38 +631,22 @@ function Logs() {
               >
                 <div class="bg-red-50 dark:bg-red-500/10 rounded-lg p-4 space-y-2">
                   <p class="text-xs font-semibold text-red-700 dark:text-red-400 mb-3">
-                    Usuario eliminado:
+                    {resourceMeta(selectedLog()?.resource).label} eliminado:
                   </p>
-                  <Show when={selectedLog()?.dataBefore.name}>
-                    <div class="flex justify-between">
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
-                        Nombre:
-                      </span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {selectedLog()?.dataBefore.name}
-                      </span>
-                    </div>
-                  </Show>
-                  <Show when={selectedLog()?.dataBefore.email}>
-                    <div class="flex justify-between">
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
-                        Email:
-                      </span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {selectedLog()?.dataBefore.email}
-                      </span>
-                    </div>
-                  </Show>
-                  <Show when={selectedLog()?.dataBefore.role}>
-                    <div class="flex justify-between">
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
-                        Rol:
-                      </span>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {selectedLog()?.dataBefore.role}
-                      </span>
-                    </div>
-                  </Show>
+                  <For each={Object.keys(FIELD_LABELS)}>
+                    {(field) => (
+                      <Show when={selectedLog()?.dataBefore[field] !== undefined}>
+                        <div class="flex justify-between gap-3">
+                          <span class="text-sm text-gray-600 dark:text-gray-400">
+                            {FIELD_LABELS[field]}:
+                          </span>
+                          <span class="text-sm font-medium text-gray-900 dark:text-white text-right">
+                            {formatFieldValue(field, selectedLog()?.dataBefore[field])}
+                          </span>
+                        </div>
+                      </Show>
+                    )}
+                  </For>
                 </div>
               </Show>
             </div>

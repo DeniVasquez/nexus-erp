@@ -34,7 +34,7 @@ const router = Router();
 
 const warehouseAudit = {
     entityModel: WarehouseModel,
-    snapshot: { fields: ['branch', 'warehouseCategory', 'name', 'description', 'isActive'] },
+    snapshot: { fields: ['branch', 'warehouseCategory', 'name', 'description', 'isActive'], populate: 'warehouseCategory' },
     compareFields: ['name', 'description', 'warehouseCategory', 'isActive']
 };
 

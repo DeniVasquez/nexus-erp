@@ -6,13 +6,23 @@ const FIELD_LABELS = {
   commercialName: "Nombre comercial",
   nit: "NIT",
   nrc: "NRC",
+  commercialLine1: "Giro comercial principal",
+  commercialLine2: "Giro comercial secundario",
+  commercialLine3: "Giro comercial adicional",
+  address: "Dirección",
+  department: "Departamento",
+  municipality: "Municipio",
+  district: "Distrito",
   email: "Correo electrónico",
   phone: "Teléfono",
+  webSite: "Sitio web",
+  logo: "Logo",
   isActive: "Estado",
 };
 
 const formatValue = (field, value) => {
   if (field === "isActive") return value ? "Activo" : "Inactivo";
+  if (value && typeof value === "object") return value.name || "-";
   return value || "-";
 };
 

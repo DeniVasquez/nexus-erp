@@ -32,12 +32,12 @@ const controller = new BranchController({
 
 const router = Router();
 
+const BRANCH_AUDIT_FIELDS = ['name', 'address', 'department', 'municipality', 'district', 'phone', 'email', 'isActive'];
+
 const branchAudit = {
     entityModel: BranchModel,
-    snapshot: {
-        fields: ['company', 'name', 'address', 'phone', 'email', 'isActive']
-    },
-    compareFields: ['name', 'address', 'phone', 'email', 'isActive']
+    snapshot: { fields: ['company', ...BRANCH_AUDIT_FIELDS], populate: ['department', 'municipality', 'district'] },
+    compareFields: BRANCH_AUDIT_FIELDS
 };
 
 // rutas con metadata. Mismo criterio que companies: view/create/update/

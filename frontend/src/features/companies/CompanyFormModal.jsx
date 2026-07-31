@@ -262,35 +262,53 @@ function CompanyFormModal(props) {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Municipio *
               </label>
-              <select
-                class="input-field w-full"
-                required
-                disabled={!department()}
-                value={municipality()}
-                onChange={(e) => handleMunicipalityChange(e.target.value)}
+              <Show
+                when={!municipalities.loading}
+                fallback={
+                  <div class="input-field bg-gray-100 dark:bg-gray-800">
+                    Cargando...
+                  </div>
+                }
               >
-                <option value="">Selecciona...</option>
-                <For each={municipalities()?.data}>
-                  {(mun) => <option value={mun._id}>{mun.name}</option>}
-                </For>
-              </select>
+                <select
+                  class="input-field w-full"
+                  required
+                  disabled={!department()}
+                  value={municipality()}
+                  onChange={(e) => handleMunicipalityChange(e.target.value)}
+                >
+                  <option value="">Selecciona...</option>
+                  <For each={municipalities()?.data}>
+                    {(mun) => <option value={mun._id}>{mun.name}</option>}
+                  </For>
+                </select>
+              </Show>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Distrito *
               </label>
-              <select
-                class="input-field w-full"
-                required
-                disabled={!municipality()}
-                value={district()}
-                onChange={(e) => setDistrict(e.target.value)}
+              <Show
+                when={!districts.loading}
+                fallback={
+                  <div class="input-field bg-gray-100 dark:bg-gray-800">
+                    Cargando...
+                  </div>
+                }
               >
-                <option value="">Selecciona...</option>
-                <For each={districts()?.data}>
-                  {(dist) => <option value={dist._id}>{dist.name}</option>}
-                </For>
-              </select>
+                <select
+                  class="input-field w-full"
+                  required
+                  disabled={!municipality()}
+                  value={district()}
+                  onChange={(e) => setDistrict(e.target.value)}
+                >
+                  <option value="">Selecciona...</option>
+                  <For each={districts()?.data}>
+                    {(dist) => <option value={dist._id}>{dist.name}</option>}
+                  </For>
+                </select>
+              </Show>
             </div>
           </div>
 

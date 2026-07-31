@@ -33,12 +33,17 @@ const controller = new CompanyController({
 const router = Router();
 
 // Config de auditoría compartida por las rutas de empresas
+const COMPANY_AUDIT_FIELDS = [
+    'name', 'commercialName', 'nit', 'nrc',
+    'commercialLine1', 'commercialLine2', 'commercialLine3',
+    'address', 'department', 'municipality', 'district',
+    'phone', 'email', 'webSite', 'logo', 'isActive'
+];
+
 const companyAudit = {
     entityModel: CompanyModel,
-    snapshot: {
-        fields: ['name', 'commercialName', 'nit', 'nrc', 'email', 'phone', 'isActive']
-    },
-    compareFields: ['name', 'commercialName', 'nit', 'nrc', 'email', 'phone', 'isActive']
+    snapshot: { fields: COMPANY_AUDIT_FIELDS, populate: ['department', 'municipality', 'district'] },
+    compareFields: COMPANY_AUDIT_FIELDS
 };
 
 // rutas con metadata. Nota: el ERS define companies.view/create/update/
