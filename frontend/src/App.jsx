@@ -11,6 +11,7 @@ const Users = lazy(() => import("./pages/Users"));
 const Logs = lazy(() => import("./pages/Logs"));
 const Roles = lazy(() => import("./pages/Roles"));
 const Companies = lazy(() => import("./features/companies/Companies"));
+const Branches = lazy(() => import("./features/branches/Branches"));
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/logs" component={Logs} />
           <Route path="/roles" component={Roles} />
           <Route path="/companies" component={Companies} />
+          <Route path="/branches" component={Branches} />
           <Route path="/" component={Login} />
         </SolidRouter>
       </AuthProvider>

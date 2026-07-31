@@ -64,6 +64,16 @@ function Sidebar() {
           </A>
         </Show>
 
+        <Show when={auth.hasPermission('branches.view')}>
+          <A href="/branches" class={navLinkClass('/branches')}>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01" />
+            </svg>
+            Sucursales
+          </A>
+        </Show>
+
         {/* Mostrar según PERMISOS, no por rol */}
         <Show when={auth.hasPermission('users.read') || auth.hasPermission('users.create') || auth.hasPermission('users.update')}>
           <div class="pt-4 pb-1">
