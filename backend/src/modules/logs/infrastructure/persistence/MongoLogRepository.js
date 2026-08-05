@@ -98,4 +98,9 @@ export class MongoLogRepository extends LogRepository {
         });
         return toDomain(doc);
     }
+
+    async deleteAll() {
+        const result = await LogModel.deleteMany({});
+        return result.deletedCount;
+    }
 }

@@ -106,6 +106,13 @@ class ApiService {
     return http.requestBlob(`/logs/reports/pdf${params ? `?${params}` : ""}`);
   }
 
+  // Solo disponible en desarrollo (bloqueado en el backend si NODE_ENV=production)
+  async deleteAllLogs() {
+    return http.request("/logs/dev/purge", {
+      method: "DELETE",
+    });
+  }
+
   // Roles
   async getRoles(params = {}) {
     const queryParams = new URLSearchParams(params).toString();

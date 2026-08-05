@@ -21,9 +21,10 @@ const toLogDTO = (entry) => ({
 });
 
 export class LogController {
-    constructor({ listLogs, listLogsForExport }) {
+    constructor({ listLogs, listLogsForExport, deleteAllLogs }) {
         this.listLogsUseCase = listLogs;
         this.listLogsForExportUseCase = listLogsForExport;
+        this.deleteAllLogsUseCase = deleteAllLogs;
     }
 
     getAll = async (req, res) => {
@@ -83,6 +84,23 @@ export class LogController {
             console.error('Error generando PDF:', error);
             res.status(500).json({
                 msj: 'Error generando reporte PDF',
+                error: error.message,
+            });
+        }
+    };
+
+    deleteAll = async (req, res) => {
+        try {
+            const result = await this.deleteAllLogsUseCase.execute();
+
+            res.status(200).json({
+                msj: 'Logs eliminados correctamente',
+                deletedCount: result.deletedCount,
+            });
+        } catch (error) {
+            console.error('Error eliminando logs:', error);
+            res.status(500).json({
+                msj: 'Error al eliminar logs',
                 error: error.message,
             });
         }
