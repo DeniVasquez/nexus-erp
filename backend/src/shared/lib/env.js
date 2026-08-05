@@ -7,7 +7,8 @@ const envs = [
     "PORT",
     "MONGO_URI",
     "JWT_SECRET",
-    "JWT_EXPIRES_IN"
+    "JWT_EXPIRES_IN",
+    "DELETE_ENDPOINT"
 ]
 
 const criticalEnvs = [
@@ -32,3 +33,4 @@ export const port = process.env.PORT
 export const url = process.env.MONGO_URI
 export const jwt_secret = process.env.JWT_SECRET
 export const jwt_expires = process.env.JWT_EXPIRES_IN
+export const delete_endpoint_env = process.env.DELETE_ENDPOINT
