@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { authMiddleware } from '#shared/middleware/auth.middleware.js';
 import { checkPermission } from '#shared/middleware/checkPermission.middleware.js';
+import { devOnlyMiddleware } from '#shared/middleware/devOnly.middleware.js';
 
 import { MongoLogRepository } from '../persistence/MongoLogRepository.js';
 import { ListLogsUseCase } from '../../application/use-cases/listLogs.js';
 import { ListLogsForExportUseCase } from '../../application/use-cases/listLogsForExport.js';
+import { DeleteAllLogsUseCase } from '../../application/use-cases/deleteAllLogs.js';
 import { LogController } from './log.controller.js';
 
 // --- Composition root: aquí, y solo aquí, se conectan las piezas concretas ---
@@ -14,6 +16,7 @@ const logRepository = new MongoLogRepository();
 const controller = new LogController({
     listLogs: new ListLogsUseCase(logRepository),
     listLogsForExport: new ListLogsForExportUseCase(logRepository),
+    deleteAllLogs: new DeleteAllLogsUseCase(logRepository),
 });
 
 const router = Router();
@@ -44,6 +47,14 @@ const routes = [
         description: 'Listar logs del sistema',
         handler: controller.getAll,
         middlewares: []
+    },
+    {
+        method: 'DELETE',
+        path: '/logs/dev/purge',
+        permission: 'logs.deleteAll',
+        description: 'Eliminar todos los logs (solo desarrollo)',
+        handler: controller.deleteAll,
+        middlewares: [devOnlyMiddleware]
     },
 ];
 

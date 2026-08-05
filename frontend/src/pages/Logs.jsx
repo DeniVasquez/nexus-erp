@@ -83,6 +83,7 @@ function Logs() {
 
   const [showExportMenu, setShowExportMenu] = createSignal(false);
   const [exporting, setExporting] = createSignal(false);
+  const [purging, setPurging] = createSignal(false);
 
   const applyFilters = () => {
     const f = {};
@@ -183,6 +184,25 @@ function Logs() {
       showToast.error(error.message || "Error al generar reporte PDF");
     } finally {
       setExporting(false);
+    }
+  };
+
+  // Solo desarrollo: vaciar toda la colección de logs para que no se llene la DB
+  const handlePurgeLogs = async () => {
+    if (!window.confirm("Esto eliminará TODOS los logs de la base de datos. ¿Continuar?")) {
+      return;
+    }
+
+    setPurging(true);
+    try {
+      const result = await api.deleteAllLogs();
+      showToast.success(`Logs eliminados: ${result.deletedCount}`);
+      setCurrentPage(1);
+      refetch();
+    } catch (error) {
+      showToast.error(error.message || "Error al eliminar los logs");
+    } finally {
+      setPurging(false);
     }
   };
 
@@ -368,6 +388,17 @@ function Logs() {
                     </div>
                   </Show>
                 </div>
+              </Show>
+
+              <Show when={import.meta.env.DEV && auth.hasPermission("logs.deleteAll")}>
+                <button
+                  onClick={handlePurgeLogs}
+                  disabled={purging()}
+                  class="btn-secondary flex items-center gap-2 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10"
+                >
+                  <span>🗑️</span>
+                  <span>{purging() ? "Eliminando..." : "Vaciar logs (dev)"}</span>
+                </button>
               </Show>
             </div>
           </div>

@@ -15,4 +15,8 @@ export class LogRepository {
   async create(_logEntry) {
     throw new Error('LogRepository.create no implementado');
   }
+
+  async deleteAll() {
+    throw new Error('LogRepository.deleteAll no implementado');
+  }
 }
