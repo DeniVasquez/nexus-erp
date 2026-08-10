@@ -16,6 +16,13 @@ import branchesRoutes, { branchRoutes as branchRoutesMetadata } from "#modules/b
 import warehouseCategoriesRoutes, { warehouseCategoryRoutes as warehouseCategoryRoutesMetadata } from "#modules/warehouse-categories/infrastructure/http/warehouseCategory.routes.js";
 import warehousesRoutes, { warehouseRoutes as warehouseRoutesMetadata } from "#modules/warehouses/infrastructure/http/warehouse.routes.js";
 import locationsRoutes, { locationRoutes as locationRoutesMetadata } from "#modules/locations/infrastructure/http/location.routes.js";
+import countriesRoutes, { countryRoutes as countryRoutesMetadata } from "#modules/countries/infrastructure/http/country.routes.js";
+import categoriesRoutes, { categoryRoutes as categoryRoutesMetadata } from "#modules/categories/infrastructure/http/category.routes.js";
+import unitsRoutes, { unitRoutes as unitRoutesMetadata } from "#modules/units/infrastructure/http/unit.routes.js";
+import subCategoriesRoutes, { subCategoryRoutes as subCategoryRoutesMetadata } from "#modules/sub-categories/infrastructure/http/subCategory.routes.js";
+import suppliersRoutes, { supplierRoutes as supplierRoutesMetadata } from "#modules/suppliers/infrastructure/http/supplier.routes.js";
+import supplierContactsRoutes, { supplierContactRoutes as supplierContactRoutesMetadata } from "#modules/supplier-contacts/infrastructure/http/supplierContact.routes.js";
+import productsRoutes, { productRoutes as productRoutesMetadata } from "#modules/products/infrastructure/http/product.routes.js";
 
 // bootstrap: sincronizar el catálogo de permisos y los roles del sistema
 import { MongoPermissionRepository } from "#modules/permissions/infrastructure/persistence/MongoPermissionRepository.js";
@@ -52,7 +59,7 @@ mongoConnect().then(async () => {
 
   await seedGeo();
 
-  const routeModules = [userRoutesMetadata, roleRoutesMetadata, logRoutesMetadata, companyRoutesMetadata, geoRoutesMetadata, branchRoutesMetadata, warehouseCategoryRoutesMetadata, warehouseRoutesMetadata, locationRoutesMetadata];
+  const routeModules = [userRoutesMetadata, roleRoutesMetadata, logRoutesMetadata, companyRoutesMetadata, geoRoutesMetadata, branchRoutesMetadata, warehouseCategoryRoutesMetadata, warehouseRoutesMetadata, locationRoutesMetadata, countryRoutesMetadata, categoryRoutesMetadata, unitRoutesMetadata, subCategoryRoutesMetadata, supplierRoutesMetadata, supplierContactRoutesMetadata, productRoutesMetadata];
 
   // Auto-descubrir y sincronizar permisos desde la metadata de las rutas
   const syncDiscoveredPermissions = new SyncDiscoveredPermissionsUseCase(new MongoPermissionRepository());
@@ -76,3 +83,10 @@ server.use("/api/branches", branchesRoutes);
 server.use("/api/warehouse-categories", warehouseCategoriesRoutes);
 server.use("/api/warehouses", warehousesRoutes);
 server.use("/api/locations", locationsRoutes);
+server.use("/api/countries", countriesRoutes);
+server.use("/api/categories", categoriesRoutes);
+server.use("/api/units", unitsRoutes);
+server.use("/api/sub-categories", subCategoriesRoutes);
+server.use("/api/suppliers", suppliersRoutes);
+server.use("/api/supplier-contacts", supplierContactsRoutes);
+server.use("/api/products", productsRoutes);
