@@ -17,6 +17,17 @@ const WarehouseCategories = lazy(() =>
 );
 const Warehouses = lazy(() => import("./features/warehouses/Warehouses"));
 const Locations = lazy(() => import("./features/locations/Locations"));
+const Countries = lazy(() => import("./features/countries/Countries"));
+const Categories = lazy(() => import("./features/categories/Categories"));
+const SubCategories = lazy(() =>
+  import("./features/sub-categories/SubCategories"),
+);
+const Units = lazy(() => import("./features/units/Units"));
+const Suppliers = lazy(() => import("./features/suppliers/Suppliers"));
+const SupplierContacts = lazy(() =>
+  import("./features/supplier-contacts/SupplierContacts"),
+);
+const Products = lazy(() => import("./features/products/Products"));
 
 function App() {
   return (
@@ -38,6 +49,13 @@ function App() {
           />
           <Route path="/warehouses" component={Warehouses} />
           <Route path="/locations" component={Locations} />
+          <Route path="/countries" component={Countries} />
+          <Route path="/categories" component={Categories} />
+          <Route path="/sub-categories" component={SubCategories} />
+          <Route path="/units" component={Units} />
+          <Route path="/suppliers" component={Suppliers} />
+          <Route path="/supplier-contacts" component={SupplierContacts} />
+          <Route path="/products" component={Products} />
           <Route path="/" component={Login} />
         </SolidRouter>
       </AuthProvider>
