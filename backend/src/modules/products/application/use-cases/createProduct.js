@@ -30,7 +30,10 @@ export class CreateProductUseCase {
     const codeTaken = await this.productRepository.findByCode(data.code);
     if (codeTaken) throw new DuplicateProductCodeError();
 
-    const product = new Product({ ...data, uuid: randomUUID() });
+    // category se denormaliza desde subCategory.category (ERS v0.6): nunca
+    // la manda el cliente, así queda garantizado que coincide con la
+    // sub-categoría elegida (mismo criterio que uuid, autogenerado acá).
+    const product = new Product({ ...data, category: subCategory.category?._id ?? subCategory.category, uuid: randomUUID() });
     return this.productRepository.create(product);
   }
 }
