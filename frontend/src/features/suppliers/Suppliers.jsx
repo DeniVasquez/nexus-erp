@@ -154,7 +154,7 @@ function Suppliers() {
               <input
                 type="text"
                 class="input-field"
-                placeholder="Buscar por nombre, email o teléfono..."
+                placeholder="Buscar por código, nombre, email o teléfono..."
                 value={searchInput()}
                 onInput={(e) => setSearchInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && applyFilters()}
@@ -211,6 +211,9 @@ function Suppliers() {
                 <thead>
                   <tr class="border-b border-gray-200 dark:border-gray-800">
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Código
+                    </th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Proveedor
                     </th>
                     <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -236,6 +239,9 @@ function Suppliers() {
                   <For each={suppliers()?.data}>
                     {(supplier) => (
                       <tr class="border-b border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                          {supplier.code}
+                        </td>
                         <td class="px-6 py-4">
                           <p class="text-sm font-medium text-gray-900 dark:text-white">
                             {supplier.name}

@@ -30,18 +30,24 @@ const controller = new SupplierController({
 
 const router = Router();
 
+const SUPPLIER_AUDIT_FIELDS = ['code', 'country', 'name', 'address', 'phone', 'email', 'website', 'isActive'];
+
 const supplierAudit = {
     entityModel: SupplierModel,
-    snapshot: { fields: ['country', 'name', 'address', 'phone', 'email', 'isActive'], populate: 'country' },
-    compareFields: ['country', 'name', 'address', 'phone', 'email', 'isActive']
+    snapshot: { fields: SUPPLIER_AUDIT_FIELDS, populate: 'country' },
+    compareFields: SUPPLIER_AUDIT_FIELDS
 };
 
-// Proveedores, sin sección propia en el ERS v0.5 (llega solo hasta el
-// capítulo 6.5). Construido a partir del diagrama de BD de Denis. FK
+// Proveedores: construido originalmente a partir del diagrama de BD de
+// Denis (sin sección propia en el ERS v0.5, que llegaba solo hasta el
+// capítulo 6.5). El ERS v0.6 agregó el capítulo 6.6 "Proveedores y
+// Contactos de Proveedores" con RN-SUP-001 a 013 — de ahí salieron `code`
+// (RN-SUP-002: obligatorio y único) y `website` (RN-SUP-012: formato de
+// URL) como campos oficiales que el diagrama original no mostraba. FK
 // obligatoria a `countries`, editable (no es una relación de identidad como
 // branch->company, es un dato del proveedor, igual que el departamento en
-// companies). Sin unicidad de nombre: el diagrama no lo marca como llave.
-// "Consulta por país" se resuelve con GET /suppliers?country=<id>.
+// companies). Sin unicidad de nombre: ni el diagrama ni el ERS lo marcan
+// como llave. "Consulta por país" se resuelve con GET /suppliers?country=<id>.
 const routes = [
     {
         method: 'GET',

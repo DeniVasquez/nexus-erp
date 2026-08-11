@@ -7,6 +7,10 @@ export class SupplierRepository {
     throw new Error('SupplierRepository.findById no implementado');
   }
 
+  async findByCode(_code) {
+    throw new Error('SupplierRepository.findByCode no implementado');
+  }
+
   async create(_supplier) {
     throw new Error('SupplierRepository.create no implementado');
   }

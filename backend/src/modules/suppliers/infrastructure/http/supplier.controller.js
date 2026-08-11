@@ -2,16 +2,19 @@ import {
   InvalidSupplierIdError,
   SupplierNotFoundError,
   CountryNotFoundForSupplierError,
+  DuplicateSupplierCodeError,
 } from '../../domain/errors.js';
 
 const toSupplierDTO = (supplier) => ({
   _id: supplier.id,
   id: supplier.id,
+  code: supplier.code,
   country: supplier.country,
   name: supplier.name,
   address: supplier.address,
   phone: supplier.phone,
   email: supplier.email,
+  website: supplier.website,
   isActive: supplier.isActive,
   createdAt: supplier.createdAt,
   updatedAt: supplier.updatedAt,
@@ -23,7 +26,7 @@ const pickDefinedFields = (body, keys) =>
     return changes;
   }, {});
 
-const SUPPLIER_FIELDS = ['country', 'name', 'address', 'phone', 'email'];
+const SUPPLIER_FIELDS = ['code', 'country', 'name', 'address', 'phone', 'email', 'website'];
 
 export class SupplierController {
   constructor({ listSuppliers, getSupplierById, createSupplier, updateSupplier, activateSupplier, deactivateSupplier }) {
@@ -39,6 +42,7 @@ export class SupplierController {
     if (error instanceof InvalidSupplierIdError) return res.status(400).json({ msj: error.message });
     if (error instanceof SupplierNotFoundError) return res.status(404).json({ msj: error.message });
     if (error instanceof CountryNotFoundForSupplierError) return res.status(400).json({ msj: error.message });
+    if (error instanceof DuplicateSupplierCodeError) return res.status(400).json({ msj: error.message });
     return res.status(500).json({ msj: fallbackMsj, error: error.message });
   }
 

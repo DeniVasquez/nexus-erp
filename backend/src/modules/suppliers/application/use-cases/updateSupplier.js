@@ -1,4 +1,4 @@
-import { SupplierNotFoundError, CountryNotFoundForSupplierError } from '../../domain/errors.js';
+import { SupplierNotFoundError, CountryNotFoundForSupplierError, DuplicateSupplierCodeError } from '../../domain/errors.js';
 
 export class UpdateSupplierUseCase {
   constructor(supplierRepository, countryRepository) {
@@ -9,6 +9,11 @@ export class UpdateSupplierUseCase {
   async execute(id, changes) {
     const supplier = await this.supplierRepository.findById(id);
     if (!supplier) throw new SupplierNotFoundError();
+
+    if (changes.code && changes.code !== supplier.code) {
+      const codeTaken = await this.supplierRepository.findByCode(changes.code);
+      if (codeTaken) throw new DuplicateSupplierCodeError();
+    }
 
     if (changes.country) {
       const country = await this.countryRepository.findById(changes.country);
