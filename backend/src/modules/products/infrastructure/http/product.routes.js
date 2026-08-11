@@ -33,13 +33,13 @@ const controller = new ProductController({
 const router = Router();
 
 const PRODUCT_AUDIT_FIELDS = [
-    'subCategory', 'unit', 'purchaseUnit', 'saleUnit', 'code', 'sku',
+    'subCategory', 'category', 'unit', 'purchaseUnit', 'saleUnit', 'code', 'sku',
     'name', 'size', 'dimensions', 'description', 'presentation', 'isActive'
 ];
 
 const productAudit = {
     entityModel: ProductModel,
-    snapshot: { fields: PRODUCT_AUDIT_FIELDS, populate: ['subCategory', 'unit', 'purchaseUnit', 'saleUnit'] },
+    snapshot: { fields: PRODUCT_AUDIT_FIELDS, populate: ['subCategory', 'category', 'unit', 'purchaseUnit', 'saleUnit'] },
     compareFields: PRODUCT_AUDIT_FIELDS
 };
 
@@ -47,11 +47,13 @@ const productAudit = {
 // capítulo 6.5). Construido a partir del diagrama de BD de Denis + las
 // reglas generales RN-013 (código único) y RN-014 (no eliminar productos
 // con movimientos históricos, satisfecha gratis por el patrón isActive sin
-// borrado físico que ya usa toda la app). FK a `sub-categories` (la
-// categoría se deriva por el join, no se guarda id_category duplicado) +
-// 3 FKs independientes a `units` (base, compra, venta), todas editables
-// (son atributos del producto, no relaciones de identidad). `uuid` se
-// autogenera en el caso de uso, nunca lo manda el cliente.
+// borrado físico que ya usa toda la app). FK a `sub-categories` + FK
+// `category` denormalizada (ERS v0.6): se recalcula sola en el caso de uso
+// a partir de subCategory.category, el cliente no puede setearla directo,
+// así nunca queda desincronizada. + 3 FKs independientes a `units` (base,
+// compra, venta), todas editables (son atributos del producto, no
+// relaciones de identidad). `uuid` se autogenera en el caso de uso, nunca
+// lo manda el cliente.
 const routes = [
     {
         method: 'GET',

@@ -6,6 +6,11 @@ const productSchema = new Schema({
         ref: 'SubCategory',
         required: [true, 'La sub-categoría es obligatoria']
     },
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        required: [true, 'La categoría es obligatoria']
+    },
     unit: {
         type: Schema.Types.ObjectId,
         ref: 'Unit',

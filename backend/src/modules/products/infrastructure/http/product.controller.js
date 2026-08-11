@@ -10,6 +10,7 @@ const toProductDTO = (product) => ({
   _id: product.id,
   id: product.id,
   subCategory: product.subCategory,
+  category: product.category,
   unit: product.unit,
   purchaseUnit: product.purchaseUnit,
   saleUnit: product.saleUnit,
