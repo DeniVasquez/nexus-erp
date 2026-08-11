@@ -9,6 +9,7 @@ const toDomain = (doc) =>
         ? new Product({
               id: doc._id.toString(),
               subCategory: doc.subCategory,
+              category: doc.category,
               unit: doc.unit,
               purchaseUnit: doc.purchaseUnit,
               saleUnit: doc.saleUnit,
@@ -34,6 +35,7 @@ const assertValidId = (id) => {
 
 const POPULATE = [
     { path: 'subCategory', select: 'name category' },
+    { path: 'category', select: 'name' },
     { path: 'unit', select: 'name type' },
     { path: 'purchaseUnit', select: 'name type' },
     { path: 'saleUnit', select: 'name type' },
@@ -81,6 +83,7 @@ export class MongoProductRepository extends ProductRepository {
     async create(product) {
         const doc = await ProductModel.create({
             subCategory: product.subCategory,
+            category: product.category,
             unit: product.unit,
             purchaseUnit: product.purchaseUnit,
             saleUnit: product.saleUnit,

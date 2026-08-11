@@ -24,6 +24,9 @@ export class UpdateProductUseCase {
     if (changes.subCategory) {
       const subCategory = await this.subCategoryRepository.findById(changes.subCategory);
       if (!subCategory) throw new SubCategoryNotFoundForProductError();
+      // Recalcular category denormalizada para que no quede desincronizada
+      // con la nueva sub-categoría.
+      changes.category = subCategory.category?._id ?? subCategory.category;
     }
 
     const unitFields = ['unit', 'purchaseUnit', 'saleUnit'].filter((field) => changes[field]);
