@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '#shared/middleware/auth.middleware.js';
+import { loginRateLimiter } from '#shared/middleware/loginRateLimit.middleware.js';
 
 import { MongoUserRepository } from '#modules/users/infrastructure/persistence/MongoUserRepository.js';
 import { MongoRoleRepository } from '#modules/roles/infrastructure/persistence/MongoRoleRepository.js';
@@ -31,7 +32,7 @@ const controller = new AuthController({
 const router = Router();
 
 // rutas publicas
-router.post('/login', controller.login);
+router.post('/login', loginRateLimiter, controller.login);
 router.post('/register', controller.register);
 
 // logout solo necesita estar logeado
