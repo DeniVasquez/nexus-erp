@@ -1,5 +1,5 @@
 import { Supplier } from '../../domain/Supplier.js';
-import { CountryNotFoundForSupplierError } from '../../domain/errors.js';
+import { CountryNotFoundForSupplierError, DuplicateSupplierCodeError } from '../../domain/errors.js';
 
 export class CreateSupplierUseCase {
   constructor(supplierRepository, countryRepository) {
@@ -10,6 +10,10 @@ export class CreateSupplierUseCase {
   async execute(data) {
     const country = await this.countryRepository.findById(data.country);
     if (!country) throw new CountryNotFoundForSupplierError();
+
+    // RN-SUP-002: el código interno del proveedor debe ser único.
+    const codeTaken = await this.supplierRepository.findByCode(data.code);
+    if (codeTaken) throw new DuplicateSupplierCodeError();
 
     const supplier = new Supplier(data);
     return this.supplierRepository.create(supplier);

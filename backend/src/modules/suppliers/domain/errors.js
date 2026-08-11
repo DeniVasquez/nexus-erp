@@ -22,3 +22,9 @@ export class CountryNotFoundForSupplierError extends DomainError {
     super('El país indicado no existe');
   }
 }
+
+export class DuplicateSupplierCodeError extends DomainError {
+  constructor() {
+    super('Ya existe un proveedor con ese código');
+  }
+}
