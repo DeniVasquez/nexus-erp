@@ -8,11 +8,13 @@ const toDomain = (doc) =>
     doc
         ? new Supplier({
               id: doc._id.toString(),
+              code: doc.code,
               country: doc.country,
               name: doc.name,
               address: doc.address,
               phone: doc.phone,
               email: doc.email,
+              website: doc.website,
               isActive: doc.isActive,
               createdAt: doc.createdAt,
               updatedAt: doc.updatedAt,
@@ -34,6 +36,7 @@ export class MongoSupplierRepository extends SupplierRepository {
         if (search) {
             filter.$or = [
                 { name: { $regex: search, $options: 'i' } },
+                { code: { $regex: search, $options: 'i' } },
                 { email: { $regex: search, $options: 'i' } },
                 { phone: { $regex: search, $options: 'i' } },
             ];
@@ -61,13 +64,20 @@ export class MongoSupplierRepository extends SupplierRepository {
         return toDomain(doc);
     }
 
+    async findByCode(code) {
+        const doc = await SupplierModel.findOne({ code });
+        return toDomain(doc);
+    }
+
     async create(supplier) {
         const doc = await SupplierModel.create({
+            code: supplier.code,
             country: supplier.country,
             name: supplier.name,
             address: supplier.address,
             phone: supplier.phone,
             email: supplier.email,
+            website: supplier.website,
         });
         const populated = await doc.populate(POPULATE);
         return toDomain(populated);

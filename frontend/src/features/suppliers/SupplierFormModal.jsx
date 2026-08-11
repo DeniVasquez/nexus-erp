@@ -14,11 +14,13 @@ const extractId = (value) => {
 function SupplierFormModal(props) {
   const isEditing = () => !!props.supplier;
 
+  const [code, setCode] = createSignal("");
   const [country, setCountry] = createSignal("");
   const [name, setName] = createSignal("");
   const [address, setAddress] = createSignal("");
   const [phone, setPhone] = createSignal("");
   const [email, setEmail] = createSignal("");
+  const [website, setWebsite] = createSignal("");
 
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal("");
@@ -31,11 +33,13 @@ function SupplierFormModal(props) {
   // Precargar el formulario al abrir en modo edición (o limpiarlo en modo creación)
   createEffect(() => {
     const supplier = props.supplier;
+    setCode(supplier?.code || "");
     setCountry(extractId(supplier?.country));
     setName(supplier?.name || "");
     setAddress(supplier?.address || "");
     setPhone(supplier?.phone || "");
     setEmail(supplier?.email || "");
+    setWebsite(supplier?.website || "");
     setError("");
   });
 
@@ -45,11 +49,13 @@ function SupplierFormModal(props) {
     setError("");
 
     const payload = {
+      code: code(),
       country: country(),
       name: name(),
       address: address(),
       phone: phone(),
       email: email(),
+      website: website(),
     };
 
     try {
@@ -85,6 +91,19 @@ function SupplierFormModal(props) {
         </div>
 
         <form onSubmit={handleSubmit} class="p-6 space-y-4 overflow-y-auto">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Código *
+            </label>
+            <input
+              type="text"
+              required
+              class="input-field w-full"
+              value={code()}
+              onInput={(e) => setCode(e.target.value)}
+            />
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Nombre *
@@ -159,6 +178,19 @@ function SupplierFormModal(props) {
               class="input-field w-full"
               value={address()}
               onInput={(e) => setAddress(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Sitio web
+            </label>
+            <input
+              type="url"
+              placeholder="https://..."
+              class="input-field w-full"
+              value={website()}
+              onInput={(e) => setWebsite(e.target.value)}
             />
           </div>
 

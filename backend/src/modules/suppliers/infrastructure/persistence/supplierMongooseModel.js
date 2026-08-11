@@ -1,6 +1,12 @@
 import { Schema, model } from 'mongoose';
 
 const supplierSchema = new Schema({
+    code: {
+        type: String,
+        required: [true, 'El código del proveedor es obligatorio'],
+        unique: true,
+        trim: true
+    },
     country: {
         type: Schema.Types.ObjectId,
         ref: 'Country',
@@ -24,6 +30,11 @@ const supplierSchema = new Schema({
         trim: true,
         lowercase: true,
         match: [/^\S+@\S+\.\S+$/, 'Email no válido']
+    },
+    website: {
+        type: String,
+        trim: true,
+        match: [/^https?:\/\/\S+\.\S+$/, 'Sitio web no válido']
     },
     isActive: {
         type: Boolean,
