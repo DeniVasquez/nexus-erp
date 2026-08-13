@@ -33,11 +33,13 @@ function BranchFormModal(props) {
   );
 
   const [departments] = createResource(() => geoApi.getDepartments());
-  const [municipalities] = createResource(department, (deptId) =>
-    geoApi.getMunicipalities(deptId),
+  const [municipalities] = createResource(
+    () => department() || undefined,
+    (deptId) => geoApi.getMunicipalities(deptId),
   );
-  const [districts] = createResource(municipality, (munId) =>
-    geoApi.getDistricts(munId),
+  const [districts] = createResource(
+    () => municipality() || undefined,
+    (munId) => geoApi.getDistricts(munId),
   );
 
   // Precargar el formulario al abrir en modo edición (o limpiarlo en modo creación)
