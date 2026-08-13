@@ -19,8 +19,8 @@ function Sidebar() {
      hover:text-gray-900 dark:hover:text-white`;
 
   return (
-    <aside class="w-64 min-h-screen border-r border-gray-200 dark:border-gray-800 
-                  bg-white dark:bg-black flex flex-col">
+    <aside class="w-64 h-screen border-r border-gray-200 dark:border-gray-800
+                  bg-white dark:bg-black flex flex-col overflow-hidden">
 
       {/* Logo */}
       <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-800">
@@ -36,7 +36,7 @@ function Sidebar() {
       </div>
 
       {/* Navegacion */}
-      <nav class="flex-1 px-3 py-4 space-y-1">
+      <nav class="flex-1 min-h-0 overflow-y-auto px-3 py-4 space-y-1">
 
         {/* Dashboard - Todos los usuarios autenticados */}
         <A href="/dashboard" class={navLinkClass('/dashboard')}>
