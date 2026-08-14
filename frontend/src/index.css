@@ -56,4 +56,28 @@
   .divider {
     @apply border-gray-200 dark:border-gray-800;
   }
+
+  .auth-bg {
+    @apply page-bg relative overflow-hidden;
+    background-image: radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.05), transparent 60%);
+  }
+
+  .dark .auth-bg {
+    background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), transparent 60%);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
 }
