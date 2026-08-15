@@ -70,6 +70,13 @@ export class MongoLocationRepository extends LocationRepository {
         return toDomain(doc);
     }
 
+    async findCoordinatesAndCodesByWarehouse(warehouseId) {
+        return LocationModel.find(
+            { warehouse: warehouseId },
+            { code: 1, aisle: 1, rack: 1, level: 1, position: 1, _id: 0 },
+        ).lean();
+    }
+
     async create(location) {
         const doc = await LocationModel.create({
             warehouse: location.warehouse,
@@ -83,6 +90,23 @@ export class MongoLocationRepository extends LocationRepository {
         });
         const populated = await doc.populate(POPULATE);
         return toDomain(populated);
+    }
+
+    async createMany(locations) {
+        const docs = await LocationModel.insertMany(
+            locations.map((location) => ({
+                warehouse: location.warehouse,
+                code: location.code,
+                aisle: location.aisle,
+                rack: location.rack,
+                level: location.level,
+                position: location.position,
+                capacity: location.capacity,
+                notes: location.notes,
+            })),
+            { ordered: false },
+        );
+        return docs.map(toDomain);
     }
 
     async update(id, changes) {

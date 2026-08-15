@@ -17,6 +17,13 @@ export const locationsApi = {
     });
   },
 
+  createBatch(data) {
+    return http.request("/locations/batch", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
   update(id, data) {
     return http.request(`/locations/${id}`, {
       method: "PUT",

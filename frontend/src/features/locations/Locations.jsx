@@ -7,6 +7,7 @@ import Layout from "../../components/layout/Layout";
 import Pagination from "../../components/Pagination";
 import { showToast } from "../../utils/toast";
 import LocationFormModal from "./LocationFormModal";
+import LocationBatchModal from "./LocationBatchModal";
 import LocationHistoryModal from "./LocationHistoryModal";
 
 function Locations() {
@@ -50,6 +51,8 @@ function Locations() {
   const [showFormModal, setShowFormModal] = createSignal(false);
   const [editingLocation, setEditingLocation] = createSignal(null);
 
+  const [showBatchModal, setShowBatchModal] = createSignal(false);
+
   const [showHistoryModal, setShowHistoryModal] = createSignal(false);
   const [selectedLocation, setSelectedLocation] = createSignal(null);
 
@@ -92,6 +95,11 @@ function Locations() {
     refetch();
   };
 
+  const handleBatchSaved = () => {
+    setShowBatchModal(false);
+    refetch();
+  };
+
   const toggleStatus = async (location) => {
     const action = location.isActive ? "desactivar" : "activar";
     showToast.confirm(
@@ -130,9 +138,17 @@ function Locations() {
               </p>
             </div>
             <Show when={auth.hasPermission("locations.create")}>
-              <button onClick={openCreate} class="btn-primary">
-                + Nueva ubicación
-              </button>
+              <div class="flex gap-3">
+                <button
+                  onClick={() => setShowBatchModal(true)}
+                  class="btn-secondary"
+                >
+                  Generar por lotes
+                </button>
+                <button onClick={openCreate} class="btn-primary">
+                  + Nueva ubicación
+                </button>
+              </div>
             </Show>
           </div>
 
@@ -316,6 +332,13 @@ function Locations() {
             location={editingLocation()}
             onClose={() => setShowFormModal(false)}
             onSaved={handleSaved}
+          />
+        </Show>
+
+        <Show when={showBatchModal()}>
+          <LocationBatchModal
+            onClose={() => setShowBatchModal(false)}
+            onSaved={handleBatchSaved}
           />
         </Show>
 
