@@ -40,3 +40,15 @@ export class DuplicateLocationCoordinatesError extends DomainError {
     super('Ya existe una ubicación con esa combinación de pasillo, estante, nivel y posición en este almacén');
   }
 }
+
+export class InvalidBatchRangeError extends DomainError {
+  constructor() {
+    super('El rango indicado no es válido: "desde" debe ser un entero menor o igual que "hasta"');
+  }
+}
+
+export class BatchSizeExceededError extends DomainError {
+  constructor(max, requested) {
+    super(`El lote generaría ${requested} ubicaciones y el máximo permitido es ${max}. Reducí los rangos.`);
+  }
+}

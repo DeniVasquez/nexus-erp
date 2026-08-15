@@ -10,6 +10,7 @@ import { MongoLocationRepository } from '../persistence/MongoLocationRepository.
 import { ListLocationsUseCase } from '../../application/use-cases/listLocations.js';
 import { GetLocationByIdUseCase } from '../../application/use-cases/getLocationById.js';
 import { CreateLocationUseCase } from '../../application/use-cases/createLocation.js';
+import { CreateLocationsBatchUseCase } from '../../application/use-cases/createLocationsBatch.js';
 import { UpdateLocationUseCase } from '../../application/use-cases/updateLocation.js';
 import { ActivateLocationUseCase } from '../../application/use-cases/activateLocation.js';
 import { DeactivateLocationUseCase } from '../../application/use-cases/deactivateLocation.js';
@@ -23,6 +24,7 @@ const controller = new LocationController({
     listLocations: new ListLocationsUseCase(locationRepository),
     getLocationById: new GetLocationByIdUseCase(locationRepository),
     createLocation: new CreateLocationUseCase(locationRepository, warehouseRepository),
+    createLocationsBatch: new CreateLocationsBatchUseCase(locationRepository, warehouseRepository),
     updateLocation: new UpdateLocationUseCase(locationRepository),
     activateLocation: new ActivateLocationUseCase(locationRepository),
     deactivateLocation: new DeactivateLocationUseCase(locationRepository),
@@ -71,6 +73,19 @@ const routes = [
         description: 'Crear nueva ubicación',
         handler: controller.create,
         middlewares: [logAction({ ...locationAudit, action: 'create', resource: 'locations', responseKey: 'newLocation' })]
+    },
+    {
+        // Reutiliza el permiso locations.create: sigue siendo "crear ubicaciones",
+        // solo que varias a la vez a partir de rangos de coordenadas. La bitácora
+        // se escribe dentro del propio controller (ver createBatch), no acá,
+        // porque logAction espera una única entidad en la respuesta y este
+        // endpoint devuelve un resumen de lote.
+        method: 'POST',
+        path: '/batch',
+        permission: 'locations.create',
+        description: 'Generar ubicaciones por lote a partir de rangos de coordenadas',
+        handler: controller.createBatch,
+        middlewares: []
     },
     {
         method: 'PUT',
