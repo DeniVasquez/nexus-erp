@@ -15,8 +15,16 @@ export class LocationRepository {
     throw new Error('LocationRepository.findByCoordinatesAndWarehouse no implementado');
   }
 
+  async findCoordinatesAndCodesByWarehouse(_warehouseId) {
+    throw new Error('LocationRepository.findCoordinatesAndCodesByWarehouse no implementado');
+  }
+
   async create(_location) {
     throw new Error('LocationRepository.create no implementado');
+  }
+
+  async createMany(_locations) {
+    throw new Error('LocationRepository.createMany no implementado');
   }
 
   async update(_id, _changes) {

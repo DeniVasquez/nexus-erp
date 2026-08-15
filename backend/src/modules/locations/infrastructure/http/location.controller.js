@@ -5,7 +5,18 @@ import {
   DuplicateLocationCodeError,
   InvalidCapacityError,
   DuplicateLocationCoordinatesError,
+  InvalidBatchRangeError,
+  BatchSizeExceededError,
 } from '../../domain/errors.js';
+import { MongoLogRepository } from '#modules/logs/infrastructure/persistence/MongoLogRepository.js';
+import { WriteLogEntryUseCase } from '#modules/logs/application/use-cases/writeLogEntry.js';
+
+// La ruta /batch responde con un resumen (created/skipped), no con una única
+// entidad, así que no encaja en el shape que espera el middleware genérico
+// `logAction` (responseKey → una sola entidad). Por eso este es el único
+// lugar del módulo que escribe en la bitácora "a mano", reusando el mismo
+// caso de uso que usa el middleware.
+const writeLogEntryUseCase = new WriteLogEntryUseCase(new MongoLogRepository());
 
 const toLocationDTO = (location) => ({
   _id: location.id,
@@ -32,12 +43,30 @@ const pickDefinedFields = (body, keys) =>
 const CREATE_FIELDS = ['warehouse', 'code', 'aisle', 'rack', 'level', 'position', 'capacity', 'notes'];
 // `warehouse` no es editable después de creada la ubicación (misma regla que company/branch en los módulos anteriores).
 const UPDATE_FIELDS = ['code', 'aisle', 'rack', 'level', 'position', 'capacity', 'notes'];
+const BATCH_FIELDS = [
+  'warehouse',
+  'capacity',
+  'notes',
+  'aislePrefix', 'aisleFrom', 'aisleTo',
+  'rackPrefix', 'rackFrom', 'rackTo',
+  'levelPrefix', 'levelFrom', 'levelTo',
+  'positionPrefix', 'positionFrom', 'positionTo',
+];
 
 export class LocationController {
-  constructor({ listLocations, getLocationById, createLocation, updateLocation, activateLocation, deactivateLocation }) {
+  constructor({
+    listLocations,
+    getLocationById,
+    createLocation,
+    createLocationsBatch,
+    updateLocation,
+    activateLocation,
+    deactivateLocation,
+  }) {
     this.listLocationsUseCase = listLocations;
     this.getLocationByIdUseCase = getLocationById;
     this.createLocationUseCase = createLocation;
+    this.createLocationsBatchUseCase = createLocationsBatch;
     this.updateLocationUseCase = updateLocation;
     this.activateLocationUseCase = activateLocation;
     this.deactivateLocationUseCase = deactivateLocation;
@@ -50,6 +79,8 @@ export class LocationController {
     if (error instanceof DuplicateLocationCodeError) return res.status(400).json({ msj: error.message });
     if (error instanceof InvalidCapacityError) return res.status(400).json({ msj: error.message });
     if (error instanceof DuplicateLocationCoordinatesError) return res.status(400).json({ msj: error.message });
+    if (error instanceof InvalidBatchRangeError) return res.status(400).json({ msj: error.message });
+    if (error instanceof BatchSizeExceededError) return res.status(400).json({ msj: error.message });
     return res.status(500).json({ msj: fallbackMsj, error: error.message });
   }
 
@@ -92,6 +123,35 @@ export class LocationController {
       res.status(201).json({ msj: 'Ubicación creada exitosamente', newLocation: toLocationDTO(location) });
     } catch (error) {
       this.#handleError(res, error, 'Error creando ubicación');
+    }
+  };
+
+  createBatch = async (req, res) => {
+    try {
+      const data = pickDefinedFields(req.body, BATCH_FIELDS);
+      const result = await this.createLocationsBatchUseCase.execute(data);
+
+      if (req.user) {
+        try {
+          await writeLogEntryUseCase.execute({
+            user: req.user.id,
+            action: 'create',
+            resource: 'locations',
+            details: `${req.method} ${req.originalUrl} — creadas ${result.createdCount}, omitidas ${result.skippedCount} de ${result.totalRequested} solicitadas`,
+            userAgent: req.get('user-agent'),
+            statusCode: 201,
+          });
+        } catch (logError) {
+          console.error('Error creating log:', logError);
+        }
+      }
+
+      res.status(201).json({
+        msj: `Se crearon ${result.createdCount} ubicaciones (${result.skippedCount} omitidas por ya existir)`,
+        ...result,
+      });
+    } catch (error) {
+      this.#handleError(res, error, 'Error generando ubicaciones por lote');
     }
   };
 
