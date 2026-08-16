@@ -90,6 +90,12 @@ class ApiService {
     });
   }
 
+  async unlockUser(id) {
+    return http.request(`/users/${id}/unlock`, {
+      method: "PATCH",
+    });
+  }
+
   // Logs
   async getLogs(filters = {}) {
     const params = new URLSearchParams(filters).toString();

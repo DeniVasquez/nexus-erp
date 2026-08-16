@@ -12,6 +12,7 @@ import { GetUserByIdUseCase } from '../../application/use-cases/getUserById.js';
 import { CreateUserUseCase } from '../../application/use-cases/createUser.js';
 import { UpdateUserUseCase } from '../../application/use-cases/updateUser.js';
 import { ToggleUserStatusUseCase } from '../../application/use-cases/toggleUserStatus.js';
+import { UnlockUserUseCase } from '../../application/use-cases/unlockUser.js';
 import { UserController } from './user.controller.js';
 
 // --- Composition root: aquí, y solo aquí, se conectan las piezas concretas ---
@@ -24,6 +25,7 @@ const controller = new UserController({
     createUser: new CreateUserUseCase(userRepository, roleRepository),
     updateUser: new UpdateUserUseCase(userRepository),
     toggleUserStatus: new ToggleUserStatusUseCase(userRepository),
+    unlockUser: new UnlockUserUseCase(userRepository),
 });
 
 const router = Router();
@@ -83,6 +85,14 @@ const routes = [
         permission: 'users.update',
         description: 'Activar/Desactivar usuario',
         handler: controller.toggleUserStatus,
+        middlewares: [logAction({ ...userAudit, action: 'update', resource: 'users', responseKey: 'user' })]
+    },
+    {
+        method: 'PATCH',
+        path: '/users/:id/unlock',
+        permission: 'users.update',
+        description: 'Desbloquear usuario (RN-005)',
+        handler: controller.unlockUser,
         middlewares: [logAction({ ...userAudit, action: 'update', resource: 'users', responseKey: 'user' })]
     },
     {

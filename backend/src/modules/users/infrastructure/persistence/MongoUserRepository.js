@@ -14,6 +14,8 @@ const toDomain = (doc) =>
               role: doc.role,
               isActive: doc.isActive,
               lastLogin: doc.lastLogin,
+              failedLoginAttempts: doc.failedLoginAttempts,
+              lockedUntil: doc.lockedUntil,
               createdAt: doc.createdAt,
               updatedAt: doc.updatedAt,
           })
