@@ -1,55 +1,78 @@
-import { createSignal } from 'solid-js';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, A } from '@solidjs/router';
+import { createSignal } from "solid-js";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, A } from "@solidjs/router";
+import ThemeToggle from "../components/ThemeToggle";
+import erpLogo from "../assets/erp.png";
 
 function Register() {
-  const [name, setName] = createSignal('');
-  const [email, setEmail] = createSignal('');
-  const [password, setPassword] = createSignal('');
-  const [error, setError] = createSignal('');
+  const [name, setName] = createSignal("");
+  const [email, setEmail] = createSignal("");
+  const [password, setPassword] = createSignal("");
+  const [error, setError] = createSignal("");
   const [loading, setLoading] = createSignal(false);
-  
+
   const auth = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     if (password().length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError("La contraseña debe tener al menos 6 caracteres");
       setLoading(false);
       return;
     }
 
     const result = await auth.register(name(), email(), password());
-    
+
     if (result.success) {
-      navigate('/login');
+      navigate("/login");
     } else {
       setError(result.error);
     }
-    
+
     setLoading(false);
   };
 
   return (
-    <div class="min-h-screen flex items-center justify-center page-bg">
-      <div class="w-full max-w-md">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold mb-2">Crear cuenta</h1>
-          <p class="text-gray-400">Regístrate para empezar</p>
+    <div class="auth-bg">
+      <div class="auth-brand">
+        <img
+          src={erpLogo}
+          alt="Nexus ERP"
+          class="relative w-20 h-20 rounded-2xl mb-6 object-cover ring-1 ring-white/10 shadow-sm"
+        />
+        <h2 class="relative text-3xl font-bold text-white mb-3">Nexus ERP</h2>
+        <p class="relative text-white/60 max-w-xs">
+          Gestiona inventario, proveedores y operaciones desde un solo lugar.
+        </p>
+      </div>
+
+      <div class="auth-form-panel">
+        <div class="absolute top-6 right-6">
+          <ThemeToggle />
         </div>
 
-        <div class="card">
+        <div class="w-full max-w-sm animate-fade-in-up">
+          <div class="flex flex-col items-center text-center mb-8 lg:items-start lg:text-left">
+            <img
+              src={erpLogo}
+              alt="Nexus ERP"
+              class="w-14 h-14 rounded-xl mb-4 object-cover ring-1 ring-black/5 dark:ring-white/10 shadow-sm lg:hidden"
+            />
+            <h1 class="text-3xl font-bold mb-1 text-[#2b2f42] dark:text-white">Crear cuenta</h1>
+            <p class="text-muted">Regístrate para empezar</p>
+          </div>
+
           <form onSubmit={handleSubmit} class="space-y-4">
             <div>
               <label class="block text-sm font-medium mb-2">Nombre</label>
               <input
                 type="text"
                 required
-                class="input-field w-full"
+                class="auth-input w-full"
                 placeholder="Tu nombre"
                 value={name()}
                 onInput={(e) => setName(e.target.value)}
@@ -61,7 +84,7 @@ function Register() {
               <input
                 type="email"
                 required
-                class="input-field w-full"
+                class="auth-input w-full"
                 placeholder="tu@email.com"
                 value={email()}
                 onInput={(e) => setEmail(e.target.value)}
@@ -73,7 +96,7 @@ function Register() {
               <input
                 type="password"
                 required
-                class="input-field w-full"
+                class="auth-input w-full"
                 placeholder="Mínimo 6 caracteres"
                 value={password()}
                 onInput={(e) => setPassword(e.target.value)}
@@ -81,24 +104,24 @@ function Register() {
             </div>
 
             {error() && (
-              <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-md text-sm">
-                {error()}
+              <div class="auth-error">
+                <span>{error()}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading()}
-              class="btn-primary w-full disabled:opacity-50"
+              class="auth-btn-primary w-full disabled:opacity-50"
             >
-              {loading() ? 'Creando cuenta...' : 'Crear cuenta'}
+              {loading() ? "Creando cuenta..." : "Crear cuenta"}
             </button>
           </form>
 
           <div class="mt-6 text-center">
-            <p class="text-gray-400 text-sm">
-              ¿Ya tienes cuenta?{' '}
-              <A href="/login" class="text-white hover:underline">
+            <p class="text-muted text-sm">
+              ¿Ya tienes cuenta?{" "}
+              <A href="/login" class="auth-link">
                 Inicia sesión
               </A>
             </p>
