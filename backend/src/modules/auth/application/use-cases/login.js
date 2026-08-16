@@ -1,6 +1,11 @@
 import { comparePassword } from '#shared/lib/password.js';
 import { generateToken } from '#shared/lib/jwt.js';
-import { InvalidCredentialsError, UserInactiveError } from '../../domain/errors.js';
+import { InvalidCredentialsError, UserInactiveError, UserLockedError } from '../../domain/errors.js';
+
+// RN-005: después de 5 intentos fallidos de autenticación, el usuario se
+// bloquea 5 minutos (auto-expira, sin intervención de un admin).
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCK_DURATION_MS = 5 * 60 * 1000;
 
 export class LoginUseCase {
   constructor(userRepository, writeLogEntryUseCase) {
@@ -14,10 +19,24 @@ export class LoginUseCase {
 
     if (!user.isActive) throw new UserInactiveError();
 
-    const isValidPassword = await comparePassword(password, user.password);
-    if (!isValidPassword) throw new InvalidCredentialsError();
+    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+      throw new UserLockedError(Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000));
+    }
 
-    const updated = await this.userRepository.update(user.id, { lastLogin: new Date() });
+    const isValidPassword = await comparePassword(password, user.password);
+    if (!isValidPassword) {
+      const attempts = user.failedLoginAttempts + 1;
+
+      if (attempts >= MAX_FAILED_ATTEMPTS) {
+        await this.userRepository.update(user.id, { failedLoginAttempts: 0, lockedUntil: new Date(Date.now() + LOCK_DURATION_MS) });
+        throw new UserLockedError(LOCK_DURATION_MS / 1000);
+      }
+
+      await this.userRepository.update(user.id, { failedLoginAttempts: attempts });
+      throw new InvalidCredentialsError();
+    }
+
+    const updated = await this.userRepository.update(user.id, { lastLogin: new Date(), failedLoginAttempts: 0, lockedUntil: null });
 
     const token = generateToken({
       id: updated.id,

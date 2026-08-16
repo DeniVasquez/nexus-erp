@@ -30,6 +30,14 @@ const userSchema = new Schema({
     },
     lastLogin: {
         type: Date
+    },
+    failedLoginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockedUntil: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
