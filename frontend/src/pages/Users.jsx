@@ -1,4 +1,4 @@
-import { createSignal, createResource, Show, For } from "solid-js";
+import { createSignal, createResource, onCleanup, Show, For } from "solid-js";
 import { api } from "../services/api";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/layout/Layout";
@@ -144,6 +144,35 @@ function Users() {
       alert(error.message);
     }
   }; */
+
+  // Cuenta regresiva en vivo para el badge "Bloqueado" (RN-005)
+  const [now, setNow] = createSignal(Date.now());
+  const tickId = setInterval(() => setNow(Date.now()), 1000);
+  onCleanup(() => clearInterval(tickId));
+
+  const lockRemainingSeconds = (user) => {
+    if (!user.lockedUntil) return 0;
+    return Math.max(
+      0,
+      Math.floor((new Date(user.lockedUntil).getTime() - now()) / 1000),
+    );
+  };
+
+  const formatCountdown = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
+
+  const unlockUser = async (user) => {
+    try {
+      await api.unlockUser(user._id);
+      refetch();
+      showToast.success(`Usuario ${user.name} desbloqueado correctamente`);
+    } catch (error) {
+      showToast.error(error.message);
+    }
+  };
 
   const toggleStatus = async (user) => {
     const action = user.isActive ? "desactivar" : "activar";
@@ -370,14 +399,26 @@ function Users() {
                           </span>
                         </td>
                         <td class="px-6 py-4">
-                          <div class="flex items-center gap-1.5">
+                          <Show
+                            when={lockRemainingSeconds(user) > 0}
+                            fallback={
+                              <div class="flex items-center gap-1.5">
+                                <span
+                                  class={`w-1.5 h-1.5 rounded-full ${user.isActive ? "bg-green-500" : "bg-red-500"}`}
+                                ></span>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">
+                                  {user.isActive ? "Activo" : "Inactivo"}
+                                </span>
+                              </div>
+                            }
+                          >
                             <span
-                              class={`w-1.5 h-1.5 rounded-full ${user.isActive ? "bg-green-500" : "bg-red-500"}`}
-                            ></span>
-                            <span class="text-xs text-gray-600 dark:text-gray-400">
-                              {user.isActive ? "Activo" : "Inactivo"}
+                              class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
+                                       bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400"
+                            >
+                              🔒 Bloqueado · {formatCountdown(lockRemainingSeconds(user))}
                             </span>
-                          </div>
+                          </Show>
                         </td>
                         <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
                           {new Date(user.createdAt).toLocaleDateString("es-ES")}
@@ -403,6 +444,23 @@ function Users() {
                hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                               >
                                 Editar
+                              </button>
+                            </Show>
+
+                            {/* Botón Desbloquear (RN-005), solo si está bloqueado */}
+                            <Show
+                              when={
+                                auth.hasPermission("users.update") &&
+                                lockRemainingSeconds(user) > 0
+                              }
+                            >
+                              <button
+                                onClick={() => unlockUser(user)}
+                                class="text-xs px-3 py-1.5 rounded-md border border-red-200
+               dark:border-red-500/30 text-red-600 dark:text-red-400
+               hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                              >
+                                🔓 Desbloquear
                               </button>
                             </Show>
 

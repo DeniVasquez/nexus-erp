@@ -21,18 +21,20 @@ const toUserDTO = (user) => ({
   roleId: user.role?._id || user.role,
   isActive: user.isActive,
   lastLogin: user.lastLogin,
+  lockedUntil: user.lockedUntil,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
 
 export class UserController {
-  constructor({ listUsers, getUserById, createUser, updateUser, deleteUser, toggleUserStatus }) {
+  constructor({ listUsers, getUserById, createUser, updateUser, deleteUser, toggleUserStatus, unlockUser }) {
     this.listUsersUseCase = listUsers;
     this.getUserByIdUseCase = getUserById;
     this.createUserUseCase = createUser;
     this.updateUserUseCase = updateUser;
     this.deleteUserUseCase = deleteUser;
     this.toggleUserStatusUseCase = toggleUserStatus;
+    this.unlockUserUseCase = unlockUser;
   }
 
   // Único lugar del módulo que traduce errores de dominio a códigos HTTP.
@@ -129,6 +131,15 @@ export class UserController {
       });
     } catch (error) {
       this.#handleError(res, error, 'Error al cambiar estado del usuario');
+    }
+  };
+
+  unlockUser = async (req, res) => {
+    try {
+      const user = await this.unlockUserUseCase.execute(req.params.id);
+      res.status(200).json({ msj: 'Usuario desbloqueado correctamente', user: toUserDTO(user) });
+    } catch (error) {
+      this.#handleError(res, error, 'Error al desbloquear usuario');
     }
   };
 }

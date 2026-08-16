@@ -1,4 +1,4 @@
-import { InvalidCredentialsError, UserInactiveError } from '../../domain/errors.js';
+import { InvalidCredentialsError, UserInactiveError, UserLockedError } from '../../domain/errors.js';
 import { DuplicateEmailError, InvalidRoleError, WeakPasswordError } from '#modules/users/domain/errors.js';
 
 const toAuthUserDTO = (user, roleDoc) => ({
@@ -24,6 +24,10 @@ export class AuthController {
   #handleError(res, error, fallbackMsj) {
     if (error instanceof InvalidCredentialsError) return res.status(401).json({ msj: error.message });
     if (error instanceof UserInactiveError) return res.status(403).json({ msj: error.message });
+    if (error instanceof UserLockedError) {
+      res.set('Retry-After', String(error.retryAfterSeconds));
+      return res.status(403).json({ msj: error.message });
+    }
     if (error instanceof DuplicateEmailError) return res.status(400).json({ msj: error.message });
     if (error instanceof InvalidRoleError) return res.status(400).json({ msj: error.message });
     if (error instanceof WeakPasswordError) return res.status(400).json({ msj: error.message });

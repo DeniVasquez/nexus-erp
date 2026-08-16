@@ -4,6 +4,7 @@ import cors from "cors";
 
 import { port } from "#shared/lib/env.js";
 import { mongoConnect } from "#shared/lib/db.js";
+import { globalRateLimiter } from "#shared/middleware/globalRateLimit.middleware.js";
 
 // rutas con metadata (para auto-discovery de permisos)
 import authRoutes from "#modules/auth/infrastructure/http/auth.routes.js";
@@ -47,6 +48,9 @@ server.use(
 
 // Configuramos morgan (ver las peticiones http en la terminal)
 server.use(morgan("dev"));
+
+// Rate limit global: 100 req / 15 min por IP sobre toda la API
+server.use("/api", globalRateLimiter);
 
 // Levantar servidor
 server.listen(port, () => {
