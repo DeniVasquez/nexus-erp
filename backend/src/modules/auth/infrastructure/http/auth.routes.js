@@ -33,7 +33,6 @@ const router = Router();
 
 // rutas publicas
 router.post('/login', loginRateLimiter, controller.login);
-router.post('/register', controller.register);
 
 // logout solo necesita estar logeado
 router.post('/logout', authMiddleware, controller.logout);
