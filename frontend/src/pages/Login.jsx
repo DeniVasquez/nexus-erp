@@ -1,10 +1,11 @@
 import { createSignal } from "solid-js";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, A } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import { showToast } from "../utils/toast";
 import { useDocumentTitle } from "../utils/useDocumentTitle";
 import ThemeToggle from "../components/ThemeToggle";
-import erpLogo from "../assets/erp.png";
+import erpLogoWhite from "../assets/erp-logo-white-512.png";
+import erpLogoDark from "../assets/erp-logo-dark-1024.png";
 
 function Login() {
   useDocumentTitle("Iniciar sesión");
@@ -37,23 +38,40 @@ function Login() {
   };
 
   return (
-    <div class="min-h-screen flex items-center justify-center auth-bg px-4">
-      <div class="absolute top-4 right-4">
-        <ThemeToggle />
+    <div class="auth-bg">
+      <div class="auth-brand">
+        <img
+          src={erpLogoWhite}
+          alt="Nexus ERP"
+          class="relative w-20 h-20 mb-6 object-contain"
+        />
+        <h2 class="relative text-3xl font-bold text-white mb-3">Nexus ERP</h2>
+        <p class="relative text-white/60 max-w-xs">
+          Gestiona inventario, proveedores y operaciones desde un solo lugar.
+        </p>
       </div>
 
-      <div class="w-full max-w-md animate-fade-in-up">
-        <div class="flex flex-col items-center text-center mb-8">
-          <img
-            src={erpLogo}
-            alt="Nexus ERP"
-            class="w-14 h-14 rounded-xl mb-4 object-cover"
-          />
-          <h1 class="text-3xl font-bold mb-1">Bienvenido de nuevo</h1>
-          <p class="text-muted">Inicia sesión en Nexus ERP</p>
+      <div class="auth-form-panel">
+        <div class="absolute top-6 right-6">
+          <ThemeToggle />
         </div>
 
-        <div class="card shadow-sm">
+        <div class="w-full max-w-sm animate-fade-in-up">
+          <div class="flex flex-col items-center text-center mb-8 lg:items-start lg:text-left">
+            <img
+              src={erpLogoDark}
+              alt="Nexus ERP"
+              class="w-14 h-14 mb-4 object-contain lg:hidden dark:hidden"
+            />
+            <img
+              src={erpLogoWhite}
+              alt="Nexus ERP"
+              class="w-14 h-14 mb-4 object-contain lg:hidden hidden dark:block"
+            />
+            <h1 class="text-3xl font-bold mb-1 text-[#2b2f42] dark:text-white">Bienvenido de nuevo</h1>
+            <p class="text-muted">Inicia sesión en Nexus ERP</p>
+          </div>
+
           <form onSubmit={handleSubmit} class="space-y-4">
             <div>
               <label class="block text-sm font-medium mb-2">Email</label>
@@ -68,7 +86,7 @@ function Login() {
                   type="email"
                   required
                   autocomplete="email"
-                  class="input-field w-full pl-10"
+                  class="auth-input w-full pl-10"
                   placeholder="tu@email.com"
                   value={email()}
                   onInput={(e) => setEmail(e.target.value)}
@@ -89,7 +107,7 @@ function Login() {
                   type={showPassword() ? "text" : "password"}
                   required
                   autocomplete="current-password"
-                  class="input-field w-full pl-10 pr-10"
+                  class="auth-input w-full pl-10 pr-10"
                   placeholder="••••••••"
                   value={password()}
                   onInput={(e) => setPassword(e.target.value)}
@@ -118,7 +136,7 @@ function Login() {
             </div>
 
             {error() && (
-              <div class="flex items-start gap-2 bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-md text-sm">
+              <div class="auth-error">
                 <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -130,7 +148,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading()}
-              class="btn-primary w-full disabled:opacity-50 flex items-center justify-center gap-2"
+              class="auth-btn-primary w-full disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading() && (
                 <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
@@ -138,15 +156,6 @@ function Login() {
               {loading() ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>
           </form>
-
-          <div class="mt-6 text-center">
-            <p class="text-muted text-sm">
-              ¿No tienes cuenta?{" "}
-              <A href="/register" class="text-gray-900 dark:text-white font-medium hover:underline">
-                Regístrate
-              </A>
-            </p>
-          </div>
         </div>
       </div>
     </div>
