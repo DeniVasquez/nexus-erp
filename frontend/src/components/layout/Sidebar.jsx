@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import ThemeToggle from '../ThemeToggle';
 import { Show } from 'solid-js';
+import erpLogoWhite from '../../assets/erp-logo-white-512.png';
 
 function Sidebar() {
   const auth = useAuth();
@@ -14,23 +15,20 @@ function Sidebar() {
   };
 
   const navLinkClass = (path) =>
-    `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors
-     hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400
-     hover:text-gray-900 dark:hover:text-white`;
+    `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors
+     hover:bg-white/5 text-white/60 hover:text-white`;
 
   return (
-    <aside class="w-64 h-screen border-r border-gray-200 dark:border-gray-800
-                  bg-white dark:bg-black flex flex-col overflow-hidden">
+    <aside class="w-64 h-screen border-r border-black/20
+                  bg-night-900 flex flex-col overflow-hidden">
 
       {/* Logo */}
-      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-800">
+      <div class="px-6 py-5 border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-black dark:bg-white rounded-lg flex items-center justify-center">
-            <span class="text-white dark:text-black font-bold text-sm">A</span>
-          </div>
+          <img src={erpLogoWhite} alt="Nexus ERP" class="w-8 h-8 object-contain" />
           <div>
-            <p class="font-semibold text-sm text-gray-900 dark:text-white">AdminPanel</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">{auth.user()?.role}</p>
+            <p class="font-semibold text-sm text-white">Nexus ERP</p>
+            <p class="text-xs text-white/50 capitalize">{auth.user()?.role}</p>
           </div>
         </div>
       </div>
@@ -50,7 +48,7 @@ function Sidebar() {
         {/* Empresas - raíz de la jerarquía organizacional (Company > Branch > Warehouse > Location) */}
         <Show when={auth.hasPermission('companies.read')}>
           <div class="pt-4 pb-1">
-            <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">
+            <p class="px-4 text-xs font-semibold text-white/30 uppercase tracking-wider">
               Organización
             </p>
           </div>
@@ -77,7 +75,7 @@ function Sidebar() {
         {/* Almacenes - estructura física dentro de una sucursal (ERS 6.5) */}
         <Show when={auth.hasPermission('warehouse_categories.view')}>
           <div class="pt-4 pb-1">
-            <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">
+            <p class="px-4 text-xs font-semibold text-white/30 uppercase tracking-wider">
               Almacenes
             </p>
           </div>
@@ -114,7 +112,7 @@ function Sidebar() {
         {/* Catálogo - países, categorías, unidades y proveedores para el módulo de productos */}
         <Show when={auth.hasPermission('countries.view')}>
           <div class="pt-4 pb-1">
-            <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">
+            <p class="px-4 text-xs font-semibold text-white/30 uppercase tracking-wider">
               Catálogo
             </p>
           </div>
@@ -179,7 +177,7 @@ function Sidebar() {
         {/* Mostrar según PERMISOS, no por rol */}
         <Show when={auth.hasPermission('users.read') || auth.hasPermission('users.create') || auth.hasPermission('users.update')}>
           <div class="pt-4 pb-1">
-            <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">
+            <p class="px-4 text-xs font-semibold text-white/30 uppercase tracking-wider">
               Administración
             </p>
           </div>
@@ -218,35 +216,35 @@ function Sidebar() {
       </nav>
 
       {/* Footer: Avatar + Theme */}
-      <div class="px-3 py-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+      <div class="px-3 py-4 border-t border-white/10 space-y-3">
         
         {/* Theme toggle */}
         <div class="flex items-center justify-between px-4">
-          <span class="text-xs text-gray-500 dark:text-gray-400">Tema</span>
+          <span class="text-xs text-white/50">Tema</span>
           <ThemeToggle />
         </div>
 
         {/* Avatar */}
         <div class="flex items-center gap-3 px-4 py-2 rounded-lg 
-                    bg-gray-50 dark:bg-gray-900">
-          <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 
+                    bg-white/5">
+          <div class="w-8 h-8 rounded-full bg-white/10 
                       flex items-center justify-center flex-shrink-0">
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+            <span class="text-sm font-semibold text-white/80">
               {auth.user()?.name?.charAt(0).toUpperCase()}
             </span>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+            <p class="text-sm font-medium text-white truncate">
               {auth.user()?.name}
             </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p class="text-xs text-white/50 truncate">
               {auth.user()?.email}
             </p>
           </div>
           <button
             onClick={handleLogout}
             title="Cerrar sesión"
-            class="text-gray-400 hover:text-red-500 transition-colors"
+            class="text-white/40 hover:text-red-400 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -2,7 +2,8 @@ import { createSignal } from "solid-js";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, A } from "@solidjs/router";
 import ThemeToggle from "../components/ThemeToggle";
-import erpLogo from "../assets/erp.png";
+import erpLogoWhite from "../assets/erp-logo-white-512.png";
+import erpLogoDark from "../assets/erp-logo-dark-1024.png";
 
 function Register() {
   const [name, setName] = createSignal("");
@@ -40,9 +41,9 @@ function Register() {
     <div class="auth-bg">
       <div class="auth-brand">
         <img
-          src={erpLogo}
+          src={erpLogoWhite}
           alt="Nexus ERP"
-          class="relative w-20 h-20 rounded-2xl mb-6 object-cover ring-1 ring-white/10 shadow-sm"
+          class="relative w-20 h-20 mb-6 object-contain"
         />
         <h2 class="relative text-3xl font-bold text-white mb-3">Nexus ERP</h2>
         <p class="relative text-white/60 max-w-xs">
@@ -58,9 +59,14 @@ function Register() {
         <div class="w-full max-w-sm animate-fade-in-up">
           <div class="flex flex-col items-center text-center mb-8 lg:items-start lg:text-left">
             <img
-              src={erpLogo}
+              src={erpLogoDark}
               alt="Nexus ERP"
-              class="w-14 h-14 rounded-xl mb-4 object-cover ring-1 ring-black/5 dark:ring-white/10 shadow-sm lg:hidden"
+              class="w-14 h-14 mb-4 object-contain lg:hidden dark:hidden"
+            />
+            <img
+              src={erpLogoWhite}
+              alt="Nexus ERP"
+              class="w-14 h-14 mb-4 object-contain lg:hidden hidden dark:block"
             />
             <h1 class="text-3xl font-bold mb-1 text-[#2b2f42] dark:text-white">Crear cuenta</h1>
             <p class="text-muted">Regístrate para empezar</p>
